@@ -3,6 +3,17 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import { headers } from 'next/headers'
+
+async function getBaseUrl(): Promise<string> {
+    const hdrs = await headers()
+    const proto = hdrs.get('x-forwarded-proto') || 'https'
+    const host = hdrs.get('host') || 'soundticket.es'
+    const url = `${proto}://${host}`
+    // Always use production domain for OAuth callbacks
+    if (host.includes('localhost')) return 'https://soundticket.es'
+    return url
+}
 
 const translateError = (error: string): string => {
     const msg = error.toLowerCase()
@@ -20,7 +31,7 @@ export async function loginWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,
+            redirectTo: `${await getBaseUrl()}/auth/callback`,
         },
     })
 
