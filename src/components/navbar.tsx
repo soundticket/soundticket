@@ -7,14 +7,22 @@ import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function Navbar() {
-    const supabase = await createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    let authUser = null;
+    let dbUser = null;
 
-    let dbUser = null
-    if (authUser) {
-        dbUser = await prisma.user.findUnique({
-            where: { id: authUser.id }
-        })
+    try {
+        const supabase = await createClient();
+        const { data } = await supabase.auth.getUser();
+        authUser = data?.user ?? null;
+
+        if (authUser) {
+            dbUser = await prisma.user.findUnique({
+                where: { id: authUser.id }
+            });
+        }
+    } catch (err) {
+        // In Edge/SSR context, gracefully degrade to logged-out state.
+        console.error("[Navbar] Failed to fetch user data:", err);
     }
 
     return (
@@ -50,7 +58,7 @@ export async function Navbar() {
                 </nav>
                 <div className="flex items-center gap-4 ml-auto">
                     {authUser ? (
-                        <Link 
+                        <Link
                             href="/profile"
                             className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 hover:text-primary hover:bg-primary/10")}
                         >
@@ -59,13 +67,13 @@ export async function Navbar() {
                         </Link>
                     ) : (
                         <>
-                            <Link 
+                            <Link
                                 href="/login"
                                 className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:flex hover:text-primary hover:bg-primary/10")}
                             >
                                 Iniciar Sesión
                             </Link>
-                            <Link 
+                            <Link
                                 href="/register"
                                 className={cn(buttonVariants({ variant: "default" }), "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(var(--primary),0.5)]")}
                             >
@@ -78,4 +86,3 @@ export async function Navbar() {
         </header>
     );
 }
-
