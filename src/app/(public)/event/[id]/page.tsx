@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, MapPin, Users, Share2, Heart, Clock, Ticket as TicketIcon } from "lucide-react";
