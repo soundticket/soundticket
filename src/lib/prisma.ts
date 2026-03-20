@@ -7,12 +7,21 @@ const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
 
 const prismaClientSingleton = (): PrismaClient => {
   // During Vercel build, connectionString might be missing.
-  // We return a proxy to avoid P1001 errors during static analysis.
+  // We return a recursive proxy to avoid crashes during static analysis or if DB is down.
   if (!connectionString || connectionString === 'base') {
-    console.warn("Prisma connection string missing or invalid. Using bypass proxy (likely build time).")
-    return new Proxy({} as any, {
-        get: () => () => Promise.resolve([])
-    }) as unknown as PrismaClient
+    console.warn("Prisma connection string missing or invalid. Using bypass proxy.")
+    
+    const createBypassProxy = (): any => {
+        const fn = () => Promise.resolve(null);
+        return new Proxy(fn, {
+            get: (target, prop) => {
+                if (prop === 'then') return undefined; // Avoid blocking async/await
+                return createBypassProxy();
+            }
+        });
+    };
+    
+    return createBypassProxy() as unknown as PrismaClient;
   }
 
   const pool = new pg.Pool({ connectionString })
