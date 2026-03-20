@@ -5,24 +5,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { CreditCard, Building, ShieldCheck, AlertCircle } from "lucide-react"
 
+export const dynamic = "force-dynamic";
+
 export default async function BillingPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let user = null;
+    let targetUser = null;
 
-    if (!user) {
-        redirect("/login")
-    }
+    try {
+        const supabase = await createClient();
+        const { data } = await supabase.auth.getUser();
+        user = data?.user ?? null;
+    } catch { redirect("/login"); }
 
-    const targetUser = await prisma.user.findUnique({
-        where: { id: user.id }
-    })
+    if (!user) redirect("/login");
+
+    try {
+        targetUser = await prisma.user.findUnique({ where: { id: user.id } });
+    } catch { redirect("/dashboard"); }
 
     if (!targetUser || targetUser.organizerStatus !== 'APPROVED') {
-        redirect("/profile")
+        redirect("/profile");
     }
 
-    const isConnected = targetUser.chargesEnabled
-    const stripeAccountId = targetUser.stripeAccountId
+    const isConnected = targetUser.chargesEnabled;
+    const stripeAccountId = targetUser.stripeAccountId;
 
     return (
         <div className="space-y-8 max-w-4xl">
