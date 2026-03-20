@@ -1,29 +1,50 @@
+'use client'
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { Ticket, User, LayoutDashboard, ShieldAlert } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
-import prisma from "@/lib/prisma";
+import { useEffect, useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 
-export async function Navbar() {
-    let authUser = null;
-    let dbUser = null;
+export function Navbar() {
+    const [authUser, setAuthUser] = useState<any>(null);
+    const [dbUser, setDbUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    try {
-        const supabase = await createClient();
-        const { data } = await supabase.auth.getUser();
-        authUser = data?.user ?? null;
+    useEffect(() => {
+        const supabase = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
 
-        if (authUser) {
-            dbUser = await prisma.user.findUnique({
-                where: { id: authUser.id }
-            });
-        }
-    } catch (err) {
-        // In Edge/SSR context, gracefully degrade to logged-out state.
-        console.error("[Navbar] Failed to fetch user data:", err);
-    }
+        const fetchUser = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                setAuthUser(user);
+
+                if (user) {
+                    const res = await fetch('/api/me');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setDbUser(data);
+                    }
+                }
+            } catch (err) {
+                // Graceful degradation — show logged-out state
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+
+        const { data: listener } = supabase.auth.onAuthStateChange(() => {
+            fetchUser();
+        });
+
+        return () => listener.subscription.unsubscribe();
+    }, []);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,7 +62,7 @@ export async function Navbar() {
                     <Link href="/pricing" className="transition-colors hover:text-primary text-foreground/80">
                         Precios
                     </Link>
-                    {(dbUser as any)?.organizerStatus === 'APPROVED' ? (
+                    {dbUser?.organizerStatus === 'APPROVED' ? (
                         <Link href="/dashboard" className="transition-colors hover:text-primary text-primary font-bold flex items-center gap-1">
                             <LayoutDashboard className="w-4 h-4" /> Panel Organizador
                         </Link>
@@ -57,7 +78,9 @@ export async function Navbar() {
                     )}
                 </nav>
                 <div className="flex items-center gap-4 ml-auto">
-                    {authUser ? (
+                    {loading ? (
+                        <div className="h-9 w-24 rounded-md bg-muted/30 animate-pulse" />
+                    ) : authUser ? (
                         <Link
                             href="/profile"
                             className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2 hover:text-primary hover:bg-primary/10")}
