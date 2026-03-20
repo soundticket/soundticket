@@ -7,26 +7,27 @@ import prisma from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Home() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null;
+  let featuredEvents: any[] = [];
 
-  const featuredEvents = await prisma.event.findMany({
-    where: {
-      isPublished: true
-    },
-    include: {
-      ticketTypes: {
-        orderBy: {
-          price: 'asc'
-        },
-        take: 1
-      }
-    },
-    take: 6,
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data?.user ?? null;
+  } catch { /* degradación elegante */ }
+
+  try {
+    featuredEvents = await prisma.event.findMany({
+      where: { isPublished: true },
+      include: {
+        ticketTypes: { orderBy: { price: 'asc' }, take: 1 }
+      },
+      take: 6,
+      orderBy: { createdAt: 'desc' }
+    }) ?? [];
+  } catch (err) {
+    console.error('[Home] Prisma error:', err);
+  }
 
   return (
     <div className="flex flex-col min-h-screen">

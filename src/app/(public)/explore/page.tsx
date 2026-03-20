@@ -7,27 +7,20 @@ import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
 
 export default async function ExplorePage() {
-    const events = await prisma.event.findMany({
-        where: {
-            isPublished: true
-        },
-        include: {
-            ticketTypes: {
-                orderBy: {
-                    price: 'asc'
-                },
-                take: 1
+    let events: any[] = [];
+
+    try {
+        events = await prisma.event.findMany({
+            where: { isPublished: true },
+            include: {
+                ticketTypes: { orderBy: { price: 'asc' }, take: 1 },
+                organizer: { select: { name: true } }
             },
-            organizer: {
-                select: {
-                    name: true
-                }
-            }
-        },
-        orderBy: {
-            startDate: 'asc'
-        }
-    });
+            orderBy: { startDate: 'asc' }
+        }) ?? [];
+    } catch (err) {
+        console.error('[Explore] Prisma error:', err);
+    }
 
     return (
         <div className="min-h-screen bg-background">
