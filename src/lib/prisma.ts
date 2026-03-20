@@ -2,48 +2,36 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
-// Use DIRECT_URL when available to bypass pgBouncer pooler
+// Use DIRECT_URL when available to bypass pgBouncer pooler for direct queries
 const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
 
 const prismaClientSingleton = (): PrismaClient => {
-  // During Vercel build, connectionString might be missing.
-  // We return a recursive proxy to avoid crashes during static analysis or if DB is down.
-  if (!connectionString || connectionString === 'base') {
-    console.warn("Prisma connection string missing or invalid. Using bypass proxy.")
-    
+  if (!connectionString) {
+    console.warn('[Prisma] No connection string found. Using bypass proxy (build time or env missing).')
     const createBypassProxy = (): any => {
-        const fn = () => Promise.resolve(null);
-        return new Proxy(fn, {
-            get: (target, prop) => {
-                if (prop === 'then') return undefined; // Avoid blocking async/await
-                return createBypassProxy();
-            }
-        });
-    };
-    
-    return createBypassProxy() as unknown as PrismaClient;
+      const fn = () => Promise.resolve(null)
+      return new Proxy(fn, {
+        get: (_target, prop) => {
+          if (prop === 'then') return undefined
+          return createBypassProxy()
+        }
+      })
+    }
+    return createBypassProxy() as unknown as PrismaClient
   }
 
   const pool = new pg.Pool({ connectionString })
-  const adapter = new PrismaPg(pool as any)
-  return new PrismaClient({ adapter } as any) as unknown as PrismaClient
+  const adapter = new PrismaPg(pool)
+  return new PrismaClient({ adapter })
 }
 
 declare global {
-  var prismaGlobal: undefined | PrismaClient
+  var prismaGlobal: PrismaClient | undefined
 }
 
-// In development AND production, handle singleton
-const getPrisma = () => {
-    if (process.env.NODE_ENV === 'production') {
-        if (!globalThis.prismaGlobal) {
-            globalThis.prismaGlobal = prismaClientSingleton()
-        }
-        return globalThis.prismaGlobal
-    }
-    return prismaClientSingleton()
-}
-
-const prisma = getPrisma()
+const prisma: PrismaClient =
+  process.env.NODE_ENV === 'production'
+    ? (globalThis.prismaGlobal ?? (globalThis.prismaGlobal = prismaClientSingleton()))
+    : prismaClientSingleton()
 
 export default prisma
