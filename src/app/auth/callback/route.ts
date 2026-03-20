@@ -20,10 +20,8 @@ export async function GET(request: Request) {
                 return NextResponse.redirect(`${origin}/auth/reset-password`)
             }
 
-            // Sync with Prisma
+            // Sync with Prisma (Optional/Non-blocking)
             try {
-                // For Google login, we might not have all the metadata from the signup form
-                // but we can at least ensure the user exists in our DB
                 await prisma.user.upsert({
                     where: { id: user.id },
                     update: {
@@ -41,18 +39,16 @@ export async function GET(request: Request) {
                 })
                 console.log('Prisma sync successful via Google Callback for:', user.email)
             } catch (dbError) {
-                console.error('Error syncing user with Prisma in callback:', dbError)
-                // We still redirect to profile, the app might show a profile setup later
+                console.error('Error syncing user with Prisma in callback (ignored to allow login):', dbError)
             }
 
-            const forwardedHost = request.headers.get('x-forwarded-host') // Hello, Vercel
             const isLocalEnv = process.env.NODE_ENV === 'development'
+            const host = request.headers.get('host')
 
             if (isLocalEnv) {
-                // we can be sure that origin is http://localhost:3000
                 return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
+            } else if (host) {
+                return NextResponse.redirect(`https://${host}${next}`)
             } else {
                 return NextResponse.redirect(`${origin}${next}`)
             }

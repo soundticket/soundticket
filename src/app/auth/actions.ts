@@ -168,7 +168,7 @@ export async function signup(formData: FormData) {
                 lastName,
                 phone,
                 country,
-                isVerified: false,
+                isVerified: true,
                 organizerStatus: 'APPROVED',
                 role: 'USER'
             } as any,

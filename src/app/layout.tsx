@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
@@ -27,7 +28,9 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <Navbar />
+          <Suspense fallback={<div className="h-16 border-b border-border/40 bg-background/95 blur-sm" />}>
+            <Navbar />
+          </Suspense>
           <main className="flex-1">
             {children}
           </main>
