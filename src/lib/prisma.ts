@@ -2,7 +2,11 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
-// pg.Pool does not understand the pgbouncer=true parameter — strip it.
+// For serverless (Vercel), use transaction-mode pgBouncer (DATABASE_URL, port 6543)
+// NOT the session-mode URL (DIRECT_URL, port 5432) which has a very low client limit.
+// pgBouncer transaction mode supports many more concurrent connections.
+const rawConnectionString = process.env.DATABASE_URL || process.env.DIRECT_URL
+
 function cleanConnectionString(url: string): string {
   try {
     const parsed = new URL(url)
@@ -13,12 +17,9 @@ function cleanConnectionString(url: string): string {
   }
 }
 
-const rawConnectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
-
 const prismaClientSingleton = (): PrismaClient => {
   if (!rawConnectionString) {
     console.warn('[Prisma] No connection string found — returning empty proxy.')
-    // Return a safe proxy that resolves arrays/null so pages don't crash.
     const createProxy = (): any =>
       new Proxy(() => Promise.resolve([]), {
         get: (_t, prop) => (prop === 'then' ? undefined : createProxy()),
@@ -28,7 +29,16 @@ const prismaClientSingleton = (): PrismaClient => {
   }
 
   const connectionString = cleanConnectionString(rawConnectionString)
-  const pool = new pg.Pool({ connectionString })
+
+  // Limit pool size to avoid hitting pgBouncer's max clients in serverless.
+  // Vercel can have many concurrent invocations — keep the pool small per instance.
+  const pool = new pg.Pool({
+    connectionString,
+    max: 2,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  })
+
   const adapter = new PrismaPg(pool as any)
   return new PrismaClient({ adapter })
 }
