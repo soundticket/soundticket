@@ -43,12 +43,10 @@ export async function POST(req: Request) {
             })
         }
 
-        // Determinar la URL base correcta: NEXT_PUBLIC_BASE_URL o derivarla de la request
-        const configuredBase = process.env.NEXT_PUBLIC_BASE_URL || ''
-        const isLocalhost = configuredBase.includes('localhost') || configuredBase === ''
-        const origin = isLocalhost
-            ? `https://${req.headers.get('host') || 'soundticket.es'}`
-            : configuredBase
+        // Construir origin desde las cabeceras de la request (100% fiable en Vercel)
+        const proto = req.headers.get('x-forwarded-proto') || 'https'
+        const host = req.headers.get('host') || 'soundticket.es'
+        const origin = `${proto}://${host}`
 
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccountId,
