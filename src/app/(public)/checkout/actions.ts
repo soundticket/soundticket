@@ -4,6 +4,14 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import stripe from '@/lib/stripe'
 import prisma from '@/lib/prisma'
+import { headers } from 'next/headers'
+
+async function getBaseUrl(): Promise<string> {
+    const hdrs = await headers()
+    const proto = hdrs.get('x-forwarded-proto') || 'https'
+    const host = hdrs.get('host') || 'soundticket.es'
+    return `${proto}://${host}`
+}
 
 export async function createCheckoutSession(ticketTypeId: string) {
     const supabase = await createClient()
@@ -62,8 +70,8 @@ export async function createCheckoutSession(ticketTypeId: string) {
                     destination: organizer.stripeAccountId,
                 },
             },
-            success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/event/${ticketType.eventId}`,
+            success_url: `${await getBaseUrl()}/profile?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${await getBaseUrl()}/event/${ticketType.eventId}`,
             metadata: {
                 userId: user.id,
                 ticketTypeId: ticketType.id,
