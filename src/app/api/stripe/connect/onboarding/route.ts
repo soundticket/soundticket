@@ -43,9 +43,13 @@ export async function POST(req: Request) {
             })
         }
 
-        // Generar el túnel seguro para inyectar su IBAN en los servidores aislados de Stripe
-        const origin = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-        
+        // Determinar la URL base correcta: NEXT_PUBLIC_BASE_URL o derivarla de la request
+        const configuredBase = process.env.NEXT_PUBLIC_BASE_URL || ''
+        const isLocalhost = configuredBase.includes('localhost') || configuredBase === ''
+        const origin = isLocalhost
+            ? `https://${req.headers.get('host') || 'soundticket.es'}`
+            : configuredBase
+
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccountId,
             refresh_url: `${origin}/dashboard/billing`,
