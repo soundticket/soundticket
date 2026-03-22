@@ -33,48 +33,69 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden flex items-center justify-center min-h-[80vh]">
-        {/* Abstract Background Gradients */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] -z-10" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] -z-10" />
+      <section className="relative pt-24 pb-16 md:pt-36 md:pb-24 overflow-hidden flex items-center justify-center min-h-[90vh]">
+        {/* Gradient blobs */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] bg-primary/25 rounded-full blur-[140px] -z-10" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[100px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-violet-600/10 rounded-full blur-[80px] -z-10" />
 
-        <div className="container px-4 md:px-6 relative z-10 text-center flex flex-col items-center">
-          {/* Logo oficial con efecto glow */}
-          <div className="mb-8 relative">
-            <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full scale-150" />
+        <div className="container px-4 md:px-6 relative z-10 text-center flex flex-col items-center gap-6">
+          {/* Logo */}
+          <div className="relative">
+            <div className="absolute inset-0 blur-3xl bg-primary/30 rounded-full scale-[2]" />
             <Image
               src="/logo.png"
               alt="SoundTicket"
-              width={340}
-              height={90}
-              className="relative h-auto w-[220px] md:w-[300px] object-contain drop-shadow-[0_0_20px_rgba(139,92,246,0.5)]"
+              width={280}
+              height={75}
+              className="relative h-auto w-[180px] md:w-[240px] object-contain drop-shadow-[0_0_30px_rgba(139,92,246,0.6)]"
               priority
             />
           </div>
-          <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-primary mb-8 backdrop-blur-sm">
-            <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-            Revolucionando el Ticketing
-          </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 max-w-4xl mx-auto leading-tight italic">
-            Descubre eventos, <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-primary">
+
+          {/* H1 */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.1] italic">
+            Descubre eventos,{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-300 to-blue-400">
               sin comisiones ocultas.
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            La plataforma diseñada para artistas, promotores y fans. Más transparente, más rápida y con la mejor experiencia.
+
+          {/* Subtitle */}
+          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            La plataforma de ticketing para artistas, promotores y fans que valoran la transparencia.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <Link href="/explore">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all hover:scale-105 font-bold uppercase tracking-tight">
-                Explorar Eventos
+              <Button size="lg" className="h-13 px-9 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_40px_rgba(139,92,246,0.5)] hover:shadow-[0_0_55px_rgba(139,92,246,0.7)] transition-all hover:scale-105 font-bold uppercase tracking-wide">
+                🎟 Explorar Eventos
               </Button>
             </Link>
             <Link href={user ? "/organizer" : "/login?next=/organizer"}>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg h-14 px-10 border-border bg-background/50 backdrop-blur-sm hover:bg-accent/50 transition-all font-bold uppercase tracking-tight italic">
+              <Button size="lg" variant="outline" className="h-13 px-9 text-base border-primary/40 bg-primary/5 backdrop-blur-sm hover:bg-primary/15 hover:border-primary/70 transition-all font-bold uppercase tracking-wide">
                 Soy Organizador
               </Button>
             </Link>
+          </div>
+
+          {/* Trust stats */}
+          <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-2xl font-extrabold text-primary">5%</span>
+              <span>de comisión,<br/>nada más</span>
+            </div>
+            <div className="w-px h-10 bg-border/60 hidden sm:block self-center" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-2xl font-extrabold text-primary">0</span>
+              <span>intermediarios<br/>entre tú y el dinero</span>
+            </div>
+            <div className="w-px h-10 bg-border/60 hidden sm:block self-center" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-2xl font-extrabold text-primary">100%</span>
+              <span>transparencia<br/>en cada cobro</span>
+            </div>
           </div>
         </div>
       </section>
