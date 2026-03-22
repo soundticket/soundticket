@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { CalendarDays, MapPin, ArrowRight } from "lucide-react";
@@ -38,6 +39,18 @@ export default async function Home() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] -z-10" />
 
         <div className="container px-4 md:px-6 relative z-10 text-center flex flex-col items-center">
+          {/* Logo oficial con efecto glow */}
+          <div className="mb-8 relative">
+            <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full scale-150" />
+            <Image
+              src="/logo.png"
+              alt="SoundTicket"
+              width={340}
+              height={90}
+              className="relative h-auto w-[220px] md:w-[300px] object-contain drop-shadow-[0_0_20px_rgba(139,92,246,0.5)]"
+              priority
+            />
+          </div>
           <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-primary mb-8 backdrop-blur-sm">
             <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
             Revolucionando el Ticketing

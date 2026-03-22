@@ -9,7 +9,7 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="flex flex-col gap-4">
                         <Link href="/" className="flex items-center">
-                            <Image src="/logo.png" alt="SoundTicket" width={160} height={42} className="h-8 w-auto" />
+                            <Image src="/icon.png" alt="SoundTicket" width={36} height={36} className="h-9 w-9 object-contain" />
                         </Link>
                         <p className="text-sm text-muted-foreground">
                             La plataforma de ticketing diseñada para la escena. Descubre, compra y organiza eventos con las comisiones más bajas.
