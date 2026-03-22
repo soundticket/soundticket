@@ -38,6 +38,9 @@ export async function POST(req: Request) {
                     transfers: { requested: true },
                 },
                 business_type: 'individual',
+                business_profile: {
+                    url: 'https://soundticket.es'
+                }
             })
 
             stripeAccountId = account.id
