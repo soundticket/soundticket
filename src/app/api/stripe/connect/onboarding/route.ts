@@ -22,8 +22,13 @@ export async function POST(req: Request) {
 
         let stripeAccountId = dbUser.stripeAccountId
 
+        // DIAGNÓSTICO: Verificar qué clave está usando Stripe
+        const keyPrefix = process.env.STRIPE_SECRET_KEY?.slice(0, 12) || 'NO_KEY'
+        console.log(`[Stripe Connect] Usando clave: ${keyPrefix}... | Organizador: ${dbUser.email} | stripeAccountId existente: ${stripeAccountId || 'ninguno'}`)
+
         // Crear una cuenta de Stripe Connect si el organizador no la tiene todavía
         if (!stripeAccountId) {
+            console.log('[Stripe Connect] Intentando crear cuenta Express...')
             const account = await stripe.accounts.create({
                 type: 'express',
                 country: 'ES',
@@ -36,6 +41,7 @@ export async function POST(req: Request) {
             })
 
             stripeAccountId = account.id
+            console.log(`[Stripe Connect] Cuenta creada: ${stripeAccountId}`)
 
             await prisma.user.update({
                 where: { id: dbUser.id },
@@ -56,8 +62,13 @@ export async function POST(req: Request) {
         })
 
         return NextResponse.redirect(accountLink.url, 303)
-    } catch (error) {
-        console.error("Error en Onboarding de Stripe:", error)
+    } catch (error: any) {
+        console.error("[Stripe Connect] ERROR DETALLADO:", {
+            message: error?.message,
+            type: error?.type,
+            code: error?.code,
+            statusCode: error?.statusCode,
+        })
         return new NextResponse("Internal Server Error", { status: 500 })
     }
 }
