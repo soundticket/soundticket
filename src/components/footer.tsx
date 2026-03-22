@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Ticket, Github, Twitter, Instagram } from "lucide-react";
+import { Github, Twitter, Instagram } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
     return (
@@ -7,11 +8,8 @@ export function Footer() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="flex flex-col gap-4">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="bg-primary p-1 rounded-md flex items-center justify-center">
-                                <Ticket className="h-4 w-4 text-primary-foreground" />
-                            </div>
-                            <span className="font-bold text-lg tracking-tight">SoundTicket</span>
+                        <Link href="/" className="flex items-center">
+                            <Image src="/logo.png" alt="SoundTicket" width={160} height={42} className="h-8 w-auto" />
                         </Link>
                         <p className="text-sm text-muted-foreground">
                             La plataforma de ticketing diseñada para la escena. Descubre, compra y organiza eventos con las comisiones más bajas.

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
-import { Ticket, User, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { User, LayoutDashboard, ShieldAlert } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
@@ -49,11 +50,8 @@ export function Navbar() {
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
-                <Link href="/" className="flex items-center gap-2 mr-6">
-                    <div className="bg-primary p-1.5 rounded-lg flex items-center justify-center">
-                        <Ticket className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <span className="font-bold text-xl tracking-tight uppercase">SoundTicket</span>
+                <Link href="/" className="flex items-center mr-6">
+                    <Image src="/logo.png" alt="SoundTicket" width={180} height={48} className="h-10 w-auto" priority />
                 </Link>
                 <nav className="hidden md:flex flex-1 items-center gap-6 text-sm font-medium">
                     <Link href="/explore" className="transition-colors hover:text-primary text-foreground/80">
