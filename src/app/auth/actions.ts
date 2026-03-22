@@ -367,18 +367,18 @@ export async function createEvent(formData: FormData) {
 
     // Validation: Mandatory Image
     if (!image || image.size === 0) {
-        throw new Error('La imagen del evento es obligatoria.')
+        return { error: 'La imagen del evento es obligatoria.' }
     }
 
     // Validation: Cannot be in the past
     if (startDate < new Date()) {
-        throw new Error('La fecha del evento no puede ser en el pasado.')
+        return { error: 'La fecha del evento no puede ser en el pasado.' }
     }
 
     // Validation: > 10 minutes
     const durationMs = endDate.getTime() - startDate.getTime()
     if (durationMs < 10 * 60 * 1000) {
-        throw new Error('El evento debe durar al menos 10 minutos.')
+        return { error: 'El evento debe durar al menos 10 minutos.' }
     }
 
     // Upload image to Supabase Storage
@@ -396,7 +396,7 @@ export async function createEvent(formData: FormData) {
 
     if (uploadError) {
         console.error('Image upload error:', uploadError)
-        throw new Error('Error al subir la imagen. Inténtalo de nuevo.')
+        return { error: 'Error al subir la imagen. Inténtalo de nuevo.' }
     }
 
     const { data: { publicUrl } } = supabase.storage
@@ -406,42 +406,52 @@ export async function createEvent(formData: FormData) {
     const coverImageUrl = publicUrl
 
     // Parse ticket types from a JSON hidden field or similar
-    const ticketTypesData = JSON.parse(formData.get('ticketTypes') as string)
+    let ticketTypesData;
+    try {
+        ticketTypesData = JSON.parse(formData.get('ticketTypes') as string)
+    } catch {
+        return { error: 'Error al procesar los tipos de entrada.' }
+    }
 
     // Ensure all tickets meet Stripe's 0.50 EUR minimum threshold
     for (const tt of ticketTypesData) {
         if (parseFloat(tt.price) < 0.50) {
-            throw new Error('Todas las entradas deben tener un precio mínimo de 0.50€ por exigencias de la pasarela de pago.')
+            return { error: 'Todas las entradas deben tener un precio mínimo de 0.50€ por exigencias de la pasarela de pago.' }
         }
     }
 
-    const event = await (prisma.event as any).create({
-        data: {
-            title,
-            description,
-            location,
-            genre: genre || null,
-            coverImage: coverImageUrl,
-            startDate,
-            endDate,
-            organizerId: user.id,
-            status: 'PENDING',
-            ticketTypes: {
-                create: ticketTypesData.map((tt: any) => ({
-                    name: tt.name,
-                    price: parseFloat(tt.price),
-                    totalDisponibles: parseInt(tt.capacity || tt.stock || 100)
-                }))
-            }
-        } as any
-    })
+    try {
+        await (prisma.event as any).create({
+            data: {
+                title,
+                description,
+                location,
+                genre: genre || null,
+                coverImage: coverImageUrl,
+                startDate,
+                endDate,
+                organizerId: user.id,
+                status: 'PENDING',
+                ticketTypes: {
+                    create: ticketTypesData.map((tt: any) => ({
+                        name: tt.name,
+                        price: parseFloat(tt.price),
+                        totalDisponibles: parseInt(tt.capacity || tt.stock || 100)
+                    }))
+                }
+            } as any
+        })
 
-    const { revalidatePath } = await import('next/cache')
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/events')
-    revalidatePath('/explore')
+        const { revalidatePath } = await import('next/cache')
+        revalidatePath('/dashboard')
+        revalidatePath('/dashboard/events')
+        revalidatePath('/explore')
 
-    return redirect('/dashboard/events?success=Evento+enviado+a+revisión')
+        return { success: true }
+    } catch (dbError: any) {
+        console.error('Database error creating event:', dbError)
+        return { error: 'Error en la base de datos al guardar el evento.' }
+    }
 }
 
 export async function approveEvent(eventId: string) {

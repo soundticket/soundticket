@@ -73,12 +73,16 @@ export default function CreateEventPage() {
         formData.append("ticketTypes", JSON.stringify(ticketTypes))
 
         try {
-            await createEvent(formData)
-            toast.success("¡Evento enviado con éxito!")
-            router.push("/dashboard/events")
+            const result = await createEvent(formData)
+            if (result?.error) {
+                toast.error(result.error)
+            } else if (result?.success) {
+                toast.success("¡Evento publicado con éxito!")
+                router.push("/dashboard/events?success=Evento+enviado+a+revisión")
+            }
         } catch (error: any) {
-            toast.error(error.message || "Error al crear el evento")
-            console.error(error)
+            toast.error(error?.message || "Error al crear el evento. Inténtalo de nuevo.")
+            console.error("Error no controlado:", error)
         } finally {
             setLoading(false)
         }
