@@ -69,6 +69,7 @@ export async function createCheckoutSession(ticketTypeId: string) {
                 transfer_data: {
                     destination: organizer.stripeAccountId,
                 },
+                on_behalf_of: organizer.stripeAccountId,
             },
             success_url: `${await getBaseUrl()}/profile?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${await getBaseUrl()}/event/${ticketType.eventId}`,
