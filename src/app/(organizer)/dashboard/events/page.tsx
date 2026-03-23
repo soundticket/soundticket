@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Plus, Ticket, Calendar, Edit, Trash2 } from "lucide-react"
+import { Plus, Ticket, Calendar, Edit, Trash2, ScanLine } from "lucide-react"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { createClient } from "@/utils/supabase/server"
@@ -100,11 +100,20 @@ export default async function OrganizerEventsPage() {
                                     <div className="flex items-center gap-2 relative z-20">
                                         {event.status !== 'CANCELLED' ? (
                                             <>
+                                                {event.status === 'APPROVED' && (
+                                                    <Link 
+                                                        href={`/dashboard/events/${event.id}/checkin`}
+                                                        className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2 cursor-pointer relative z-20 shadow-[0_0_10px_rgba(var(--primary),0.3)] hover:scale-105 transition-transform")}
+                                                        title="Escanear Entradas en Puerta"
+                                                    >
+                                                        <ScanLine className="h-4 w-4" /> <span className="hidden md:inline">Check-in</span>
+                                                    </Link>
+                                                )}
                                                 <Link 
                                                     href={`/dashboard/events/${event.id}/edit`}
                                                     className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 bg-background/50 cursor-pointer relative z-20")}
                                                 >
-                                                    <Edit className="h-3.5 w-3.5" /> Editar
+                                                    <Edit className="h-3.5 w-3.5" /> <span className="hidden md:inline">Editar</span>
                                                 </Link>
                                                 <div className="cursor-pointer relative z-20">
                                                     <DeleteEventButton eventId={event.id} />
