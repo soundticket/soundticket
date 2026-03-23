@@ -88,7 +88,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                                 const recipientEmail = isTestMode ? 'onboarding@resend.dev' : user.email;
 
                                 await resend.emails.send({
-                                    from: 'SoundTicket <info@hitstar.es>',
+                                    from: 'SoundTicket <info@soundticket.es>',
                                     to: [recipientEmail],
                                     subject: `🎟️ Tu entrada para ${event.title}`,
                                     html: htmlContent

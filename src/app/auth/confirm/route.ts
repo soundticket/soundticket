@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     - **Registro**: Ya no solo crea el usuario en Supabase, sino que sincroniza inmediatamente con Prisma.
     - **Detección de Conflictos**: Si intentas registrarte con un correo que ya existía pero con un ID distinto (por pruebas previas), el sistema detecta el conflicto y limpia el registro antiguo automáticamente.
     - **Confirmación**: La ruta `/auth/confirm` ahora maneja correctamente las redirecciones de Next.js y asegura que el flag `isVerified` se active en la base de datos SQL.
-    - **Email de Respaldo**: Como el dominio `hitstar.es` aún requiere verificación DNS, el sistema detecta el fallo y envía automáticamente el email desde `onboarding@resend.dev` para no bloquear al usuario.
+    - **Email de Respaldo**: Como el dominio `soundticket.es` aún requiere verificación DNS, el sistema detecta el fallo y envía automáticamente el email desde `onboarding@resend.dev` para no bloquear al usuario.
 
     ---
 

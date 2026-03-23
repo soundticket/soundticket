@@ -212,7 +212,7 @@ export async function signup(formData: FormData) {
                 const htmlContent = verifyEmailTemplate(name, confirmLink)
 
                 const res = await resend.emails.send({
-                    from: 'SoundTicket <info@hitstar.es>',
+                    from: 'SoundTicket <info@soundticket.es>',
                     to: [email],
                     subject: 'Confirma tu registro - SoundTicket',
                     html: htmlContent
