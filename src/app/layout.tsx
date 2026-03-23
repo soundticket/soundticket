@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaRegistry } from "@/components/pwa-registry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <PwaRegistry />
           <Suspense fallback={<div className="h-16 border-b border-border/40 bg-background/95 blur-sm" />}>
             <Navbar />
           </Suspense>
