@@ -27,6 +27,7 @@ export function Navbar() {
     const [authUser, setAuthUser] = useState<any>(null);
     const [dbUser, setDbUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -156,65 +157,67 @@ export function Navbar() {
 
                     {/* Mobile Menu (Sheet) */}
                     <div className="md:hidden flex items-center">
-                        <Sheet>
-                            <SheetTrigger className="hover:bg-primary/10 hover:text-primary transition-colors h-9 w-9 rounded-md inline-flex items-center justify-center">
-                                <Menu className="h-6 w-6" />
+                        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                            <SheetTrigger className="hover:bg-primary/10 hover:text-primary transition-colors h-10 w-10 rounded-md inline-flex items-center justify-center active:scale-95 active:bg-primary/20">
+                                <Menu className="h-7 w-7" />
                             </SheetTrigger>
-                            <SheetContent side="right" className="w-[80vw] sm:w-[350px] flex flex-col pt-12 border-l border-border/50 bg-background/95 backdrop-blur-xl">
-                                <SheetHeader>
-                                    <SheetTitle className="text-left flex items-center gap-3 font-bold text-xl italic mb-4">
+                            <SheetContent side="right" className="w-[85vw] sm:w-[350px] flex flex-col pt-12 px-6 border-l border-border/50 bg-background/95 backdrop-blur-xl h-full overflow-hidden">
+                                <SheetHeader className="mb-6 shrink-0">
+                                    <SheetTitle className="text-left flex items-center gap-3 font-bold text-xl italic">
                                         <Image src="/icon.png" alt="SoundTicket" width={24} height={24} className="h-6 w-6 object-contain" />
                                         SoundTicket
                                     </SheetTitle>
                                 </SheetHeader>
-                                <nav className="flex flex-col gap-6 text-lg font-medium flex-1 overflow-y-auto pb-8">
-                                    <Link href="/explore" className="hover:text-primary transition-colors flex items-center py-2">Explorar Eventos</Link>
-                                    <Link href="/pricing" className="hover:text-primary transition-colors flex items-center py-2">Precios</Link>
+                                <nav className="flex flex-col gap-6 text-[17px] font-medium flex-1 overflow-y-auto pb-safe pb-16 scrollbar-hide">
+                                    <Link href="/explore" onClick={() => setIsOpen(false)} className="hover:text-primary transition-colors flex items-center py-2 active:opacity-50">Explorar Eventos</Link>
+                                    <Link href="/pricing" onClick={() => setIsOpen(false)} className="hover:text-primary transition-colors flex items-center py-2 active:opacity-50">Precios</Link>
                                     
                                     {dbUser?.organizerStatus === 'APPROVED' ? (
-                                        <Link href="/dashboard" className="text-primary hover:opacity-80 transition-opacity flex items-center py-2 gap-2">
+                                        <Link href="/dashboard" onClick={() => setIsOpen(false)} className="text-primary hover:opacity-80 transition-opacity flex items-center py-2 gap-2 active:scale-95 origin-left">
                                             <LayoutDashboard className="w-5 h-5" /> Panel Organizador
                                         </Link>
                                     ) : (
-                                        <Link href="/organizer" className="hover:text-primary transition-colors flex items-center py-2">Organizar Evento</Link>
+                                        <Link href="/organizer" onClick={() => setIsOpen(false)} className="hover:text-primary transition-colors flex items-center py-2 active:opacity-50">Organizar Evento</Link>
                                     )}
 
                                     {dbUser?.role === 'ADMIN' && (
-                                        <Link href="/admin/dashboard" className="text-primary font-bold hover:opacity-80 transition-opacity flex items-center py-2 gap-2">
+                                        <Link href="/admin/dashboard" onClick={() => setIsOpen(false)} className="text-primary font-bold hover:opacity-80 transition-opacity flex items-center py-2 gap-2 active:scale-95 origin-left">
                                             <ShieldAlert className="w-5 h-5" /> Admin Dashboard
                                         </Link>
                                     )}
 
-                                    <div className="h-px bg-border/50 w-full my-4" />
+                                    <div className="h-px bg-border/50 w-full my-2 shrink-0" />
 
                                     {loading ? (
-                                        <div className="h-10 w-full bg-muted/30 animate-pulse rounded-md mt-4" />
+                                        <div className="h-10 w-full bg-muted/30 animate-pulse rounded-md mt-2" />
                                     ) : authUser ? (
-                                        <div className="flex flex-col gap-6">
-                                            <Link href="/profile" className="flex items-center gap-3 hover:text-primary transition-colors py-2">
+                                        <div className="flex flex-col gap-5 mt-2">
+                                            <Link href="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50">
                                                 <User className="h-5 w-5" /> Mi Perfil
                                             </Link>
-                                            <Link href="/profile/history" className="flex items-center gap-3 hover:text-primary transition-colors py-2">
+                                            <Link href="/profile/history" onClick={() => setIsOpen(false)} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50">
                                                 <Ticket className="h-5 w-5" /> Mis Entradas
                                             </Link>
                                             <button 
-                                                onClick={handleSignOut}
-                                                className="flex items-center gap-3 text-red-500 text-left hover:text-red-400 transition-colors py-2 w-full mt-4"
+                                                onClick={() => { setIsOpen(false); handleSignOut(); }}
+                                                className="flex items-center gap-3 text-red-500 text-left hover:text-red-400 transition-colors py-2 w-full mt-2 active:opacity-50"
                                             >
                                                 <LogOut className="h-5 w-5" /> Cerrar sesión
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col gap-4 mt-4">
+                                        <div className="flex flex-col gap-4 mt-2 mb-8">
                                             <Link
                                                 href="/login"
-                                                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full justify-center")}
+                                                onClick={() => setIsOpen(false)}
+                                                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full justify-center active:scale-[0.98]")}
                                             >
                                                 Iniciar Sesión
                                             </Link>
                                             <Link
                                                 href="/register"
-                                                className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full justify-center bg-primary hover:bg-primary/90")}
+                                                onClick={() => setIsOpen(false)}
+                                                className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full justify-center bg-primary hover:bg-primary/90 active:scale-[0.98]")}
                                             >
                                                 Crear Cuenta
                                             </Link>
