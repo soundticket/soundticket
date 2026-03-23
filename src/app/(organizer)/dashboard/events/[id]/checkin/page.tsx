@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, use } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,9 +8,9 @@ import { CheckCircle2, XCircle, ScanLine, ArrowLeft, Loader2 } from "lucide-reac
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function CheckinPage({ params }: { params: { id: string } }) {
+export default function CheckinPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
-    const eventId = params.id;
+    const { id: eventId } = use(params);
     
     const [scanResult, setScanResult] = useState<{
         status: 'idle' | 'loading' | 'success' | 'error';
