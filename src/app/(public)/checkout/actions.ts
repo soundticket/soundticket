@@ -66,10 +66,6 @@ export async function createCheckoutSession(ticketTypeId: string) {
             mode: 'payment',
             payment_intent_data: {
                 application_fee_amount: applicationFeeAmount,
-                transfer_data: {
-                    destination: organizer.stripeAccountId,
-                },
-                on_behalf_of: organizer.stripeAccountId,
             },
             success_url: `${await getBaseUrl()}/profile?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${await getBaseUrl()}/event/${ticketType.eventId}`,
@@ -79,6 +75,8 @@ export async function createCheckoutSession(ticketTypeId: string) {
                 eventId: ticketType.event.id,
             },
             customer_email: user.email,
+        }, {
+            stripeAccount: organizer.stripeAccountId,
         })
 
         return { url: session.url }

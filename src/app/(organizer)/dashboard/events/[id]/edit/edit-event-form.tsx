@@ -152,6 +152,11 @@ export default function EditEventForm({ event }: { event: any }) {
                                 onChange={(e) => {
                                     const file = e.target.files?.[0]
                                     if (file) {
+                                        if (file.size > 4 * 1024 * 1024) {
+                                            toast.error("La nueva imagen es demasiado pesada. El tamaño máximo permitido es 4 MB.")
+                                            e.target.value = ''
+                                            return
+                                        }
                                         setImagePreview(URL.createObjectURL(file))
                                     }
                                 }}

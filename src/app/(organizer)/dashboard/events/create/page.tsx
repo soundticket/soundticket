@@ -300,6 +300,13 @@ export default function CreateEventPage() {
                                     onChange={(e) => {
                                         const file = e.target.files?.[0]
                                         if (file) {
+                                            // Vercel Serverless payload limit is 4.5MB
+                                            if (file.size > 4 * 1024 * 1024) {
+                                                toast.error("La imagen es demasiado pesada. El tamaño máximo permitido es 4 MB para asegurar la velocidad de la web.")
+                                                e.target.value = '' // Clear input
+                                                setImagePreview(null)
+                                                return
+                                            }
                                             const url = URL.createObjectURL(file)
                                             setImagePreview(url)
                                             toast.success(`Imagen cargada: ${file.name.substring(0, 20)}`)
