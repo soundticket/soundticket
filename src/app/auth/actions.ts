@@ -494,7 +494,7 @@ export async function approveEvent(eventId: string) {
             await resend.emails.send({
                 from: 'SoundTicket <info@soundticket.es>',
                 to: [updatedEvent.organizer.email],
-                subject: \`✅ Evento Aprobado: \${updatedEvent.title}\`,
+                subject: `✅ Evento Aprobado: ${updatedEvent.title}`,
                 html: eventStatusTemplate(updatedEvent.title, 'APPROVED')
             })
         } catch (e) {
@@ -533,7 +533,7 @@ export async function rejectEvent(eventId: string, reason: string) {
             await resend.emails.send({
                 from: 'SoundTicket <info@soundticket.es>',
                 to: [updatedEvent.organizer.email],
-                subject: \`❌ Evento Rechazado: \${updatedEvent.title}\`,
+                subject: `❌ Evento Rechazado: ${updatedEvent.title}`,
                 html: eventStatusTemplate(updatedEvent.title, 'REJECTED', reason)
             })
         } catch (e) {
