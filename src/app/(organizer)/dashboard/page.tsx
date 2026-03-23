@@ -137,7 +137,7 @@ export default async function OrganizerDashboard() {
                                             <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-x-6 gap-y-2">
                                                 <span className="flex items-center gap-1">
                                                     <Calendar className="h-3 w-3" />
-                                                    {event.startDate.toLocaleDateString()}
+                                                    {event.startDate.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <Ticket className="h-3 w-3" />

@@ -138,7 +138,7 @@ export default async function Home() {
                       <div className="flex flex-col gap-2 text-muted-foreground text-sm flex-1">
                         <div className="flex items-center">
                           <CalendarDays className="h-4 w-4 mr-2 text-primary" />
-                          {event.startDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {event.startDate.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-2 text-primary" />

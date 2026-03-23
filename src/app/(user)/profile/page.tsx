@@ -171,7 +171,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                                 </div>
                                 <CardDescription className="flex items-center gap-2">
                                     <CalendarDays className="h-3 w-3" />
-                                    {ticket.ticketType.event.startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    {ticket.ticketType.event.startDate.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </CardDescription>
                             </CardHeader>
 

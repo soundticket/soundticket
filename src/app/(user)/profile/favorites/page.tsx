@@ -101,7 +101,7 @@ export default async function FavoritesPage() {
                                             {event.organizer.name || "Organizador"}
                                         </span>
                                         <span className="text-xs font-medium text-foreground/70">
-                                            {event.startDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                                            {event.startDate.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
                                     <Link href={`/event/${event.id}`}>
