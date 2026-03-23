@@ -28,7 +28,7 @@ export default function PricingPage() {
                         <CardContent className="space-y-6">
                             <div className="flex items-baseline gap-1">
                                 <span className="text-7xl font-black text-primary">5%</span>
-                                <span className="text-muted-foreground font-semibold">total</span>
+                                <span className="text-muted-foreground font-semibold">de plataforma</span>
                             </div>
                             <ul className="space-y-4">
                                 <li className="flex items-center gap-3">
@@ -66,18 +66,20 @@ export default function PricingPage() {
                             </CardHeader>
                             <CardContent className="space-y-4 text-muted-foreground text-sm leading-relaxed">
                                 <p>
-                                    Nuestra comisión del 5% cubre **todo**: la infraestructura tecnológica, el soporte prioritario y las herramientas de marketing básico.
+                                    Nuestra comisión de plataforma del <strong>5% cubre todo</strong>: la infraestructura tecnológica, los servidores y el panel analítico.
                                 </p>
                                 <p>
-                                    A diferencia de otras plataformas, **no añadimos gastos de gestión** abusivos al comprador final. Tú decides si quieres absorber el 5% o añadirlo al precio base de la entrada.
+                                    A diferencia de otras plataformas, <strong>no añadimos gastos de gestión abusivos</strong> al comprador final. Eres completamente libre de fijar el precio base de la entrada a tu gusto.
                                 </p>
                             </CardContent>
                         </Card>
 
                         <div className="bg-accent/10 border border-dashed border-border p-6 rounded-xl space-y-4">
-                            <h3 className="font-bold">Comisiones de Pago</h3>
-                            <p className="text-sm text-muted-foreground italic">
-                                * Se aplican las comisiones estándar de pasarela de pago (Stripe). Aproximadamente 1.4% + 0.25€ por transacción. Pagamos directamente a tu cuenta bancaria.
+                            <h3 className="font-bold flex items-center gap-2">
+                                Comisiones de Pago <span className="text-primary italic">(Adicional)</span>
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Se aplican de forma íntegra las comisiones estándar de la pasarela de pago bancaria (Stripe) por procesamiento de tarjeta. <strong>Aproximadamente 1.5% + 0.25€ por transacción.</strong> 
                             </p>
                         </div>
                     </div>
@@ -96,24 +98,24 @@ export default function PricingPage() {
                         </thead>
                         <tbody className="divide-y divide-border/20">
                             <tr>
-                                <td className="py-4">Comisión por entrada</td>
-                                <td className="py-4 font-bold">5%</td>
-                                <td className="py-4">8% - 15%</td>
+                                <td className="py-4">Comisión de Plataforma</td>
+                                <td className="py-4 font-bold text-primary">5%</td>
+                                <td className="py-4">10% - 15%</td>
                             </tr>
                             <tr>
-                                <td className="py-4">Gastos de gestión ocultos</td>
-                                <td className="py-4 font-bold">0 €</td>
-                                <td className="py-4">1.50€ - 3.50€ / entrada</td>
+                                <td className="py-4">Gastos de gestión ocultos al cliente</td>
+                                <td className="py-4 font-bold text-primary">0 €</td>
+                                <td className="py-4">1.50€ - 3.50€ extra / entrada</td>
                             </tr>
                             <tr>
-                                <td className="py-4">Acceso a datos de clientes</td>
-                                <td className="py-4 font-bold">Sí, 100%</td>
-                                <td className="py-4">Limitado o de pago</td>
+                                <td className="py-4">Base de datos de compradores</td>
+                                <td className="py-4 font-bold text-primary">100% tuya (CSV)</td>
+                                <td className="py-4">Oculta o de pago</td>
                             </tr>
                             <tr>
-                                <td className="py-4">Tiempo de pago</td>
-                                <td className="py-4 font-bold">Inmediato / semanal</td>
-                                <td className="py-4">Tras finalizar el evento</td>
+                                <td className="py-4">Liquidación del dinero generado</td>
+                                <td className="py-4 font-bold text-primary">Automático en 3 días hábiles</td>
+                                <td className="py-4">3 a 10 días tras finalizar el evento</td>
                             </tr>
                         </tbody>
                     </table>
@@ -121,8 +123,8 @@ export default function PricingPage() {
 
                 {/* FAQ Snippet */}
                 <div className="text-center italic text-muted-foreground py-10">
-                    <p>¿Tienes un volumen de ventas superior a 50.000€ anuales?</p>
-                    <Link href="/help" className="text-primary hover:underline font-bold">Contacta con nosotros para un trato personalizado.</Link>
+                    <p>¿Tienes un volumen de ventas superior a 50.000€ anuales o organizas macrofestivales?</p>
+                    <Link href="/help" className="text-primary hover:underline font-bold mt-2 inline-block">Contacta con nosotros para un acuerdo personalizado.</Link>
                 </div>
             </div>
         </div>

@@ -84,7 +84,7 @@ export default async function Home() {
           <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-2xl font-extrabold text-primary">5%</span>
-              <span>de comisión,<br/>nada más</span>
+              <span>de comisión,<br/>nada más*</span>
             </div>
             <div className="w-px h-10 bg-border/60 hidden sm:block self-center" />
             <div className="flex items-center gap-2 text-muted-foreground">

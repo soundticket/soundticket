@@ -20,7 +20,7 @@ export default async function OrganizerPage() {
         // ... (existing features)
         {
             title: "Comisión Imbatible",
-            description: "Solo un 5% de comisión total por entrada. Sin costes fijos ni sorpresas de última hora.",
+            description: "Aplica un 5% de comisión de plataforma por entrada. Desglosando con total claridad los gastos bancarios extra.",
             icon: Zap,
         },
         {
@@ -153,9 +153,9 @@ export default async function OrganizerPage() {
 
                             <div className="bg-primary/10 rounded-2xl p-6 text-center border border-primary/20">
                                 <span className="text-5xl font-black text-primary block mb-2">5%</span>
-                                <span className="text-sm font-bold uppercase tracking-widest text-primary/80">Todo incluido</span>
+                                <span className="text-sm font-bold uppercase tracking-widest text-primary/80">De Plataforma</span>
                                 <p className="mt-4 text-xs text-muted-foreground italic">
-                                    * Sin gastos de gestión ocultos para el comprador
+                                    * Más de +1.5% pasarela Stripe
                                 </p>
                             </div>
                         </div>

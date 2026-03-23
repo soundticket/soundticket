@@ -317,7 +317,7 @@ export default function CreateEventPage() {
                                 <div className="mt-8 space-y-4">
                                     <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
                                         <p className="text-[10px] text-muted-foreground italic leading-relaxed">
-                                            * Al publicar el evento, aceptas los términos de servicio y la comisión del <span className="text-primary font-bold">5%</span> por entrada vendida.
+                                            * Al publicar el evento, aceptas los términos de servicio, la comisión de SoundTicket (<span className="text-primary font-bold">5%</span>) y los costes bancarios por procesamiento de tarjeta (Stripe).
                                         </p>
                                     </div>
                                     <Button

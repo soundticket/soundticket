@@ -99,9 +99,9 @@ export default async function BillingPage() {
                             Al operar como organizador verificado en SoundTicket, accedes a un sistema de cobros delegados sin intermediación letárgica:
                         </p>
                         <ul className="list-disc pl-5 space-y-2">
-                            <li>Recibes el <strong className="text-foreground">95%</strong> del importe pagado por el asistente en tiempo real al finalizar sus compras.</li>
-                            <li>SoundTicket retiene únicamente un <strong className="text-foreground">5%</strong> automatizado en concepto de infraestructura tecnológica y costes por pasarela.</li>
-                            <li>Las comisiones y el soporte transaccional son gestionados transparente y automáticamente por Stripe.</li>
+                            <li>Recibes el dinero del importe de tus entradas en tiempo real a medida que se venden (descontando comisiones de servicio).</li>
+                            <li>SoundTicket retiene únicamente un <strong className="text-foreground">5% fijo</strong> en concepto de uso de plataforma y la cuota de la pasarela Stripe (aprox. 1.5% + 0.25€).</li>
+                            <li>El control tecnológico y bancario, junto con el soporte para devoluciones, corre de parte de Stripe y tu panel transparente de analíticas.</li>
                         </ul>
                     </CardContent>
                 </Card>
