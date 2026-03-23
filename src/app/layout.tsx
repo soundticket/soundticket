@@ -7,6 +7,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { PwaRegistry } from "@/components/pwa-registry";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,6 +51,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <PwaInstallBanner />
           <Toaster />
         </ThemeProvider>
       </body>
