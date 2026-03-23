@@ -30,7 +30,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         notFound();
     }
 
-    const isPast = event.startDate < new Date();
+    const isPast = event.endDate < new Date();
+    const inProgress = event.startDate <= new Date() && event.endDate > new Date();
     const canBuyTickets = !isCancelled && !isPast;
 
     const startDate = event.startDate.toLocaleDateString('es-ES', {
@@ -64,6 +65,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                     {isCancelled ? (
                                         <span className="bg-destructive px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-destructive-foreground shadow-[0_0_10px_rgba(220,38,38,0.5)]">
                                             Cancelado
+                                        </span>
+                                    ) : inProgress ? (
+                                        <span className="bg-emerald-500/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] border border-emerald-500/50 animate-pulse flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                                            En Curso
                                         </span>
                                     ) : isPast ? (
                                         <span className="bg-muted px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-muted-foreground shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-border">

@@ -47,6 +47,8 @@ model Event {
   favorites       Favorite[]
   orders          Order[]
   ticketTypes     TicketType[]
+  startedEmailSent DateTime?
+  endedEmailSent   DateTime?
 }
 
 model TicketType {
