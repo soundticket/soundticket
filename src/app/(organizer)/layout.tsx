@@ -1,8 +1,10 @@
-import { LayoutDashboard, Calendar, Ticket, PlusCircle, Settings, LogOut, CreditCard } from "lucide-react"
+import { LayoutDashboard, Calendar, Ticket, PlusCircle, Settings, LogOut, CreditCard, BarChart } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
+// ... skipping to the nav section inside the sidebar to append the link
+// Wait, I can't skip inside the replacement text, it's a direct replacement of lines 1-60! I should just replace the exact block.
 import { createClient } from "@/utils/supabase/server"
 import { logout } from "@/app/auth/actions"
 import prisma from "@/lib/prisma"
@@ -56,6 +58,13 @@ export default async function OrganizerLayout({
                         >
                             <Calendar className="mr-3 h-4 w-4" />
                             Mis Eventos
+                        </Link>
+                        <Link 
+                            href="/dashboard/analytics"
+                            className={cn(buttonVariants({ variant: "ghost" }), "w-full justify-start hover:bg-primary/10 hover:text-primary font-medium text-sm h-9")}
+                        >
+                            <BarChart className="mr-3 h-4 w-4" />
+                            Analíticas
                         </Link>
                         <Link 
                             href="/dashboard/billing"
