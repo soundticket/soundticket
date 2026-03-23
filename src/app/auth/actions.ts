@@ -308,12 +308,28 @@ export async function approveOrganizer(userId: string) {
 
     try {
         console.log('[approveOrganizer] Updating database for userId:', userId)
-        await (prisma.user as any).update({
+        const updatedUser = await (prisma.user as any).update({
             where: { id: userId },
             data: {
                 organizerStatus: 'APPROVED'
             } as any
         })
+
+        if (process.env.RESEND_API_KEY && updatedUser.email) {
+            try {
+                const { resend } = await import('@/lib/resend')
+                const { organizerApprovedTemplate } = await import('@/lib/email-templates')
+                await resend.emails.send({
+                    from: 'SoundTicket <info@soundticket.es>',
+                    to: [updatedUser.email],
+                    subject: '¡Tu cuenta de Organizador ha sido aprobada! 🎉',
+                    html: organizerApprovedTemplate(updatedUser.name || 'Organizador')
+                })
+            } catch (e) {
+                console.error("Failed to send organizer approval email:", e)
+            }
+        }
+
         console.log('[approveOrganizer] Database updated successfully')
     } catch (error: any) {
         console.error('[approveOrganizer] Error updating database:', error)
@@ -462,13 +478,29 @@ export async function approveEvent(eventId: string) {
     const dbAdmin = await prisma.user.findUnique({ where: { id: adminUser.id } })
     if (dbAdmin?.role !== 'ADMIN') return redirect('/profile')
 
-    await (prisma.event as any).update({
+    const updatedEvent = await (prisma.event as any).update({
         where: { id: eventId },
         data: {
             status: 'APPROVED',
             isPublished: true
-        } as any
+        } as any,
+        include: { organizer: true }
     })
+
+    if (process.env.RESEND_API_KEY && updatedEvent.organizer?.email) {
+        try {
+            const { resend } = await import('@/lib/resend')
+            const { eventStatusTemplate } = await import('@/lib/email-templates')
+            await resend.emails.send({
+                from: 'SoundTicket <info@soundticket.es>',
+                to: [updatedEvent.organizer.email],
+                subject: \`✅ Evento Aprobado: \${updatedEvent.title}\`,
+                html: eventStatusTemplate(updatedEvent.title, 'APPROVED')
+            })
+        } catch (e) {
+            console.error("Failed to send event approval email:", e)
+        }
+    }
 
     const { revalidatePath } = await import('next/cache')
     revalidatePath('/admin/events')
@@ -484,14 +516,30 @@ export async function rejectEvent(eventId: string, reason: string) {
     const dbAdmin = await prisma.user.findUnique({ where: { id: adminUser.id } })
     if (dbAdmin?.role !== 'ADMIN') return redirect('/profile')
 
-    await (prisma.event as any).update({
+    const updatedEvent = await (prisma.event as any).update({
         where: { id: eventId },
         data: {
             status: 'REJECTED',
             rejectionReason: reason,
             isPublished: false
-        } as any
+        } as any,
+        include: { organizer: true }
     })
+
+    if (process.env.RESEND_API_KEY && updatedEvent.organizer?.email) {
+        try {
+            const { resend } = await import('@/lib/resend')
+            const { eventStatusTemplate } = await import('@/lib/email-templates')
+            await resend.emails.send({
+                from: 'SoundTicket <info@soundticket.es>',
+                to: [updatedEvent.organizer.email],
+                subject: \`❌ Evento Rechazado: \${updatedEvent.title}\`,
+                html: eventStatusTemplate(updatedEvent.title, 'REJECTED', reason)
+            })
+        } catch (e) {
+            console.error("Failed to send event rejection email:", e)
+        }
+    }
 
     const { revalidatePath } = await import('next/cache')
     revalidatePath('/admin/events')

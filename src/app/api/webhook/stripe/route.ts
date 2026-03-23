@@ -70,7 +70,7 @@ export async function POST(req: Request) {
                         where: { id: createdTicket.id },
                         include: {
                             order: { include: { user: true } },
-                            ticketType: { include: { event: true } }
+                            ticketType: { include: { event: { include: { organizer: true } } } }
                         }
                     })
 
@@ -98,6 +98,21 @@ export async function POST(req: Request) {
                             subject: `🎟️ Tu entrada para ${event.title}`,
                             html: htmlContent
                         })
+
+                        // Check if SOLD OUT
+                        if (ticketDetails.ticketType.vendidos === ticketDetails.ticketType.totalDisponibles) {
+                            try {
+                                const { eventSoldOutTemplate } = await import('@/lib/email-templates')
+                                await resend.emails.send({
+                                    from: 'SoundTicket <info@soundticket.es>',
+                                    to: [ticketDetails.ticketType.event.organizer.email],
+                                    subject: `🎟️ 🚫 SOLD OUT: ${event.title}`,
+                                    html: eventSoldOutTemplate(event.title)
+                                })
+                            } catch (e) {
+                                console.error('Failed to send Sold Out email:', e)
+                            }
+                        }
                     }
                 }
             } catch (emailError) {
