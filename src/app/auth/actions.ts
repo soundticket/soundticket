@@ -554,17 +554,39 @@ export async function deleteEvent(eventId: string) {
     if (!user) return redirect('/login')
 
     try {
-        const event = await (prisma.event as any).findUnique({ where: { id: eventId } })
+        const event = await (prisma.event as any).findUnique({ 
+            where: { id: eventId },
+            include: {
+                ticketTypes: {
+                    include: {
+                        _count: {
+                            select: { tickets: true }
+                        }
+                    }
+                }
+            }
+        })
+        
         if (!event || event.organizerId !== user.id) {
             return { error: 'No autorizado' }
         }
 
-        // Bypass Prisma Query Engine cache with raw SQL so user doesn't need to restart dev server
-        await prisma.$executeRawUnsafe(`
-            UPDATE "Event"
-            SET "status" = 'CANCELLED', "isPublished" = false
-            WHERE "id" = '${eventId}';
-        `)
+        let totalSold = 0;
+        for (const tt of event.ticketTypes) {
+            totalSold += (tt._count?.tickets || 0);
+        }
+
+        if (totalSold === 0) {
+            // Borrado físico total (Cascade) si no hay dinero de por medio
+            await (prisma.event as any).delete({ where: { id: eventId } });
+        } else {
+            // Cancelado virtual (Soft Delete) si hay dinero y tickets reales
+            await prisma.$executeRawUnsafe(`
+                UPDATE "Event"
+                SET "status" = 'CANCELLED', "isPublished" = false
+                WHERE "id" = '${eventId}';
+            `)
+        }
 
         const { revalidatePath } = await import('next/cache')
         revalidatePath('/dashboard')
@@ -573,7 +595,7 @@ export async function deleteEvent(eventId: string) {
         return { success: true }
     } catch (err: any) {
         console.error('Delete event error:', err)
-        return { error: 'No se puede borrar el evento, puede que ya tenga ventas.' }
+        return { error: 'No se puede borrar el evento en este momento.' }
     }
 }
 
