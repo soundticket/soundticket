@@ -673,7 +673,9 @@ export async function toggleFavorite(eventId: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) throw new Error('Debes iniciar sesión para guardar favoritos.')
+    if (!user) {
+        return { error: 'Debes iniciar sesión para guardar favoritos', requireLogin: true, isFavorite: false }
+    }
 
     const existing = await prisma.favorite.findUnique({
         where: {

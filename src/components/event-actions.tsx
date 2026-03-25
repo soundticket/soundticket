@@ -34,6 +34,18 @@ export function EventActions({ eventId, eventTitle }: EventActionsProps) {
         setLoading(true)
         try {
             const result = await toggleFavorite(eventId)
+            if (result.error) {
+                if (result.requireLogin) {
+                    toast.error(result.error)
+                    setTimeout(() => {
+                        window.location.href = `/login?next=/event/${eventId}`
+                    }, 1000)
+                } else {
+                    toast.error(result.error)
+                }
+                return;
+            }
+
             setIsFavorite(result.isFavorite)
             if (result.isFavorite) {
                 toast.success("¡Evento guardado en favoritos!")
