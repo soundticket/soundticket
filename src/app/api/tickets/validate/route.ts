@@ -12,20 +12,30 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { qrToken, eventId } = body;
+        const { qrToken, eventId, checkinToken } = body;
 
         if (!qrToken || !eventId) {
             return NextResponse.json({ success: false, error: "Datos incompletos" }, { status: 400 });
         }
 
-        // Verificar que el evento pertenece al organizador actual
+        // 1. Verificar autorización (por Sesión o por Token de Check-in)
         const event = await prisma.event.findUnique({
             where: { id: eventId },
-            include: { organizer: true }
+            select: { id: true, organizerId: true, checkinToken: true }
         });
 
-        if (!event || event.organizerId !== user.id) {
-            return NextResponse.json({ success: false, error: "Evento no encontrado o no tienes permisos" }, { status: 403 });
+        if (!event) {
+            return NextResponse.json({ success: false, error: "Evento no encontrado" }, { status: 404 });
+        }
+
+        const isOrganizer = user?.id === event.organizerId;
+        const isValidToken = checkinToken && checkinToken === event.checkinToken;
+
+        if (!isOrganizer && !isValidToken) {
+            return NextResponse.json({ 
+                success: false, 
+                error: "No autorizado. Debes ser el organizador o tener un enlace válido." 
+            }, { status: 403 });
         }
 
         // Buscar el ticket

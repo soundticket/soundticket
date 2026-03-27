@@ -8,6 +8,7 @@ import prisma from "@/lib/prisma"
 import { createClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
 import { DeleteEventButton } from "@/components/delete-event-button"
+import { ShareCheckinButton } from "@/components/share-checkin-button"
 
 export default async function OrganizerEventsPage() {
     const supabase = await createClient()
@@ -101,13 +102,20 @@ export default async function OrganizerEventsPage() {
                                         {event.status !== 'CANCELLED' ? (
                                             <>
                                                 {event.status === 'APPROVED' && (
-                                                    <Link 
-                                                        href={`/dashboard/events/${event.id}/checkin`}
-                                                        className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2 cursor-pointer relative z-20 shadow-[0_0_10px_rgba(var(--primary),0.3)] hover:scale-105 transition-transform")}
-                                                        title="Escanear Entradas en Puerta"
-                                                    >
-                                                        <ScanLine className="h-4 w-4" /> <span className="hidden md:inline">Check-in</span>
-                                                    </Link>
+                                                    <>
+                                                        <Link 
+                                                            href={`/dashboard/events/${event.id}/checkin`}
+                                                            className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2 cursor-pointer relative z-20 shadow-[0_0_10px_rgba(var(--primary),0.3)] hover:scale-105 transition-transform")}
+                                                            title="Escanear Entradas en Puerta"
+                                                        >
+                                                            <ScanLine className="h-4 w-4" /> <span className="hidden md:inline">Check-in</span>
+                                                        </Link>
+                                                        <ShareCheckinButton 
+                                                            eventId={event.id} 
+                                                            token={event.checkinToken} 
+                                                            eventTitle={event.title} 
+                                                        />
+                                                    </>
                                                 )}
                                                 <Link 
                                                     href={`/dashboard/events/${event.id}/edit`}

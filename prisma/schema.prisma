@@ -43,6 +43,7 @@ model Event {
   organizerId     String
   rejectionReason String?
   status          EventStatus  @default(PENDING)
+  checkinToken    String       @unique @default(uuid())
   organizer       User         @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: Cascade)
   favorites       Favorite[]
   orders          Order[]
