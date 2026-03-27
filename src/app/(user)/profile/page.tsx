@@ -1,11 +1,11 @@
 import { createClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import prisma from "@/lib/prisma"
 import stripe from "@/lib/stripe"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { QRCodeImage } from "@/components/qr-code"
-import { CalendarDays, MapPin, Ticket, CheckCircle2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+import { Ticket, CheckCircle2 } from "lucide-react"
+import { TicketCard } from "./ticket-card"
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
     const supabase = await createClient()
@@ -152,41 +152,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             {tickets.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {tickets.map((ticket) => (
-                        <Card key={ticket.id} className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-xl flex flex-col shadow-2xl group hover:border-primary/50 transition-all">
-                            <div className="relative aspect-[16/9] overflow-hidden">
-                                <img
-                                    src={ticket.ticketType.event.coverImage || `https://images.unsplash.com/photo-1540039155732-d674d40d12ce?q=80&w=800&auto=format&fit=crop`}
-                                    alt={ticket.ticketType.event.title}
-                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                            </div>
-
-                            <CardHeader className="pb-2">
-                                <div className="flex justify-between items-start">
-                                    <CardTitle className="text-xl font-bold">{ticket.ticketType.event.title}</CardTitle>
-                                    <span className="bg-primary/20 text-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">
-                                        {ticket.ticketType.name}
-                                    </span>
-                                </div>
-                                <CardDescription className="flex items-center gap-2">
-                                    <CalendarDays className="h-3 w-3" />
-                                    {ticket.ticketType.event.startDate.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                </CardDescription>
-                            </CardHeader>
-
-                            <CardContent className="space-y-6 pt-2">
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <MapPin className="h-3 w-3 mr-2 text-primary" />
-                                    {ticket.ticketType.event.location}
-                                </div>
-
-                                <div className="flex flex-col items-center justify-center py-4 bg-white/5 rounded-2xl border border-white/10">
-                                    <QRCodeImage text={ticket.id} size={160} />
-                                    <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-[0.2em]">ID: {ticket.id.substring(0, 8)}...</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <TicketCard key={ticket.id} ticket={ticket} />
                     ))}
                 </div>
             ) : (
@@ -197,11 +163,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                         <CardDescription className="mb-6">
                             ¡Busca tu próximo evento y empieza la experiencia!
                         </CardDescription>
-                        <a href="/explore">
-                            <Button className="bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.3)] hover:bg-primary/90">
-                                Explorar Eventos
-                            </Button>
-                        </a>
+                        <Link 
+                            href="/explore" 
+                            className="inline-flex h-10 px-4 py-2 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium shadow-[0_0_15px_rgba(var(--primary),0.3)] hover:bg-primary/90 transition-colors"
+                        >
+                            Explorar Eventos
+                        </Link>
                     </CardContent>
                 </Card>
             )}

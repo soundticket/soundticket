@@ -1,20 +1,12 @@
 'use client'
 
 import Link from "next/link";
-import { buttonVariants, Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { User, LayoutDashboard, ShieldAlert, Menu, LogOut, Ticket } from "lucide-react";
+import { User, LayoutDashboard, ShieldAlert, Menu, LogOut, Ticket, ChevronDown } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -22,6 +14,59 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+// Custom dropdown - avoids @base-ui/react crash
+function ProfileDropdown({ authUser, dbUser, onSignOut }: { authUser: any; dbUser: any; onSignOut: () => void }) {
+    const [open, setOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    return (
+        <div className="relative" ref={menuRef}>
+            <button
+                onClick={() => setOpen(o => !o)}
+                className="flex items-center gap-2 hover:text-primary hover:bg-primary/10 transition-colors h-9 px-4 py-2 rounded-md text-sm font-medium"
+            >
+                <User className="h-4 w-4" />
+                <span>Mi Perfil</span>
+                <ChevronDown className={cn("h-3 w-3 transition-transform duration-200", open && "rotate-180")} />
+            </button>
+            {open && (
+                <div className="absolute right-0 mt-2 w-56 rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-3 py-2 border-b border-border/50">
+                        <p className="text-sm font-medium leading-none">{dbUser?.name || "Usuario"}</p>
+                        <p className="text-xs leading-none text-muted-foreground mt-1">{authUser.email}</p>
+                    </div>
+                    <div className="py-1">
+                        <a href="/profile" className="flex w-full items-center px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors gap-2">
+                            <User className="h-4 w-4" /> Ver Perfil
+                        </a>
+                        <a href="/profile/history" className="flex w-full items-center px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors gap-2">
+                            <Ticket className="h-4 w-4" /> Mis Entradas
+                        </a>
+                    </div>
+                    <div className="border-t border-border/50 py-1">
+                        <button
+                            onClick={onSignOut}
+                            className="flex w-full items-center px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors gap-2"
+                        >
+                            <LogOut className="h-4 w-4" /> Cerrar sesión
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export function Navbar() {
     const [authUser, setAuthUser] = useState<any>(null);
@@ -105,38 +150,7 @@ export function Navbar() {
                         {loading ? (
                             <div className="h-9 w-24 rounded-md bg-muted/30 animate-pulse" />
                         ) : authUser ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger className="flex items-center gap-2 hover:text-primary hover:bg-primary/10 transition-colors h-9 px-4 py-2 rounded-md text-sm font-medium">
-                                    <User className="h-4 w-4" />
-                                    <span>Mi Perfil</span>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56 mt-2 border-border/50 bg-card/95 backdrop-blur-md">
-                                    <DropdownMenuLabel className="font-normal">
-                                        <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium leading-none">{dbUser?.name || "Usuario"}</p>
-                                            <p className="text-xs leading-none text-muted-foreground">{authUser.email}</p>
-                                        </div>
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-border/50" />
-                                    <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 hover:text-primary" onClick={() => window.location.href = '/profile'}>
-                                        <div className="flex w-full items-center">
-                                            <User className="mr-2 h-4 w-4" /> Ver Perfil
-                                        </div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 hover:text-primary" onClick={() => window.location.href = '/profile/history'}>
-                                        <div className="flex w-full items-center">
-                                            <Ticket className="mr-2 h-4 w-4" /> Mis Entradas
-                                        </div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-border/50" />
-                                    <DropdownMenuItem 
-                                        className="text-red-500 focus:text-red-500 cursor-pointer focus:bg-red-500/10"
-                                        onClick={handleSignOut}
-                                    >
-                                        <LogOut className="mr-2 h-4 w-4" /> Cerrar sesión
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <ProfileDropdown authUser={authUser} dbUser={dbUser} onSignOut={handleSignOut} />
                         ) : (
                             <div className="flex items-center gap-3">
                                 <Link
@@ -192,12 +206,12 @@ export function Navbar() {
                                         <div className="h-10 w-full bg-muted/30 animate-pulse rounded-md mt-2" />
                                     ) : authUser ? (
                                         <div className="flex flex-col gap-5 mt-2">
-                                            <Link href="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50">
+                                            <button onClick={() => { setIsOpen(false); window.location.href = '/profile'; }} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 text-left w-full">
                                                 <User className="h-5 w-5" /> Mi Perfil
-                                            </Link>
-                                            <Link href="/profile/history" onClick={() => setIsOpen(false)} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50">
+                                            </button>
+                                            <button onClick={() => { setIsOpen(false); window.location.href = '/profile/history'; }} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 text-left w-full">
                                                 <Ticket className="h-5 w-5" /> Mis Entradas
-                                            </Link>
+                                            </button>
                                             <button 
                                                 onClick={() => { setIsOpen(false); handleSignOut(); }}
                                                 className="flex items-center gap-3 text-red-500 text-left hover:text-red-400 transition-colors py-2 w-full mt-2 active:opacity-50"

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import QRCode from "qrcode"
 import { Loader2 } from "lucide-react"
 
 interface QRCodeImageProps {
@@ -11,12 +10,28 @@ interface QRCodeImageProps {
 
 export function QRCodeImage({ text, size = 200 }: QRCodeImageProps) {
     const [qrUrl, setQrUrl] = useState<string | null>(null)
+    const [hasError, setHasError] = useState(false)
 
     useEffect(() => {
-        QRCode.toDataURL(text, { width: size, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
-            .then(url => setQrUrl(url))
-            .catch(err => console.error(err))
+        // Usa dynamic import para evitar problemas CJS/ESM en Next.js
+        import("qrcode").then((QRCode) => {
+            const qrService = QRCode.default ?? QRCode
+            return qrService.toDataURL(text, { width: size, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
+        })
+        .then((url: string) => setQrUrl(url))
+        .catch((err: unknown) => {
+            console.error("QR Code Error:", err)
+            setHasError(true)
+        })
     }, [text, size])
+
+    if (hasError) {
+        return (
+            <div className="flex items-center justify-center bg-white p-4 rounded-xl border border-red-200" style={{ width: size, height: size }}>
+                <p className="text-xs text-red-500 text-center">No se pudo cargar el QR</p>
+            </div>
+        )
+    }
 
     if (!qrUrl) {
         return (
