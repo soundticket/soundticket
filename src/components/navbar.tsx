@@ -207,6 +207,9 @@ export function Navbar() {
                                     ) : authUser ? (
                                         <div className="flex flex-col gap-5 mt-2">
                                             <a href="/profile" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
+                                                <User className="h-5 w-5" /> Mi Perfil
+                                            </a>
+                                            <a href="/profile" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
                                                 <Ticket className="h-5 w-5" /> Mis Entradas
                                             </a>
                                             <a href="/profile/history" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
