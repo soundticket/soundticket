@@ -15,61 +15,79 @@ export default async function AnalyticsPage() {
     const events = await prisma.event.findMany({
         where: { organizerId: user.id },
         include: {
-            ticketTypes: true
+            ticketTypes: {
+                include: {
+                    _count: {
+                        select: { tickets: true }
+                    },
+                    tickets: {
+                        where: { isScanned: true },
+                        select: { id: true }
+                    }
+                }
+            }
         },
         orderBy: { startDate: 'desc' }
     })
 
     // Matemáticas globales
-    let totalGross = 0
-    let totalTicketsSold = 0
-    let totalPlatformFee = 0
-    let totalStripeFee = 0
+    let totalGross = 0;
+    let totalTicketsSold = 0;
+    let totalTicketsValidated = 0;
+    let totalPlatformFee = 0;
+    let totalStripeFee = 0;
 
     const eventStats = events.map(event => {
-        let eventGross = 0
-        let eventTicketsSold = 0
-        let eventPlatformFee = 0
-        let eventStripeFee = 0
+        let eventGross = 0;
+        let eventTicketsSold = 0;
+        let eventTicketsValidated = 0;
+        let eventPlatformFee = 0;
+        let eventStripeFee = 0;
 
         event.ticketTypes.forEach(tt => {
-            const sold = tt.vendidos
+            const sold = (tt as any)._count.tickets;
+            const validated = tt.tickets.length;
+            
             if (sold > 0) {
-                const revenue = tt.price * sold
-                const platformFee = revenue * 0.05
-                // Stripe EU Cost: 1.5% + 0.25€ flat per transaction (assuming 1 ticket = 1 transaction for simplicity in estimate)
-                const stripeFee = (tt.price * 0.015 + 0.25) * sold
+                const revenue = tt.price * sold;
+                const platformFee = revenue * 0.05;
+                const stripeFee = (tt.price * 0.015 + 0.25) * sold;
 
-                eventGross += revenue
-                eventTicketsSold += sold
-                eventPlatformFee += platformFee
-                eventStripeFee += stripeFee
+                eventGross += revenue;
+                eventTicketsSold += sold;
+                eventTicketsValidated += validated;
+                eventPlatformFee += platformFee;
+                eventStripeFee += stripeFee;
             }
-        })
+        });
 
-        const eventNet = eventGross - eventPlatformFee - eventStripeFee
+        const eventNet = eventGross - eventPlatformFee - eventStripeFee;
 
-        totalGross += eventGross
-        totalTicketsSold += eventTicketsSold
-        totalPlatformFee += eventPlatformFee
-        totalStripeFee += eventStripeFee
+        totalGross += eventGross;
+        totalTicketsSold += eventTicketsSold;
+        totalTicketsValidated += eventTicketsValidated;
+        totalPlatformFee += eventPlatformFee;
+        totalStripeFee += eventStripeFee;
 
         return {
             ...event,
             stats: {
                 gross: eventGross,
                 sold: eventTicketsSold,
+                validated: eventTicketsValidated,
+                pending: eventTicketsSold - eventTicketsValidated,
                 platformFee: eventPlatformFee,
                 stripeFee: eventStripeFee,
                 net: eventNet
             }
-        }
-    })
+        };
+    });
 
-    const totalNet = totalGross - totalPlatformFee - totalStripeFee
+    const totalNet = totalGross - totalPlatformFee - totalStripeFee;
+    const totalPending = totalTicketsSold - totalTicketsValidated;
 
     const formatCurrency = (val: number) => 
-        new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val)
+        new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -114,12 +132,23 @@ export default async function AnalyticsPage() {
                 <Card className="bg-card/40 backdrop-blur-xl border-border/50 shadow-xl">
                     <CardHeader className="pb-2">
                         <CardDescription className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            <Ticket className="w-4 h-4" /> Entradas Totales
+                            <Ticket className="w-4 h-4" /> Entradas / Asistencia
                         </CardDescription>
-                        <CardTitle className="text-3xl font-black">{totalTicketsSold}</CardTitle>
+                        <CardTitle className="text-3xl font-black">
+                            {totalTicketsValidated} <span className="text-sm font-bold text-muted-foreground">/ {totalTicketsSold}</span>
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-xs font-bold text-muted-foreground">Vendidas históricamente</p>
+                        <div className="flex justify-between items-center text-xs font-bold">
+                            <span className="text-emerald-500">{totalTicketsValidated} Validadas</span>
+                            <span className="text-muted-foreground">{totalPending} Pendientes</span>
+                        </div>
+                        <div className="mt-2 h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-primary" 
+                                style={{ width: `${(totalTicketsValidated / (totalTicketsSold || 1)) * 100}%` }}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -175,9 +204,23 @@ export default async function AnalyticsPage() {
                                             )}
                                             <div>
                                                 <h3 className="font-bold text-lg mb-1 line-clamp-1">{event.title}</h3>
-                                                <p className="text-xs uppercase font-bold tracking-widest text-muted-foreground">
-                                                    {event.stats.sold} Entradas Vendidas
-                                                </p>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                                                    <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                                                        {event.stats.sold} Vendidas
+                                                    </p>
+                                                    <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">
+                                                        {event.stats.validated} Validadas
+                                                    </p>
+                                                    <p className="text-[10px] uppercase font-bold tracking-widest text-orange-500/80">
+                                                        {event.stats.pending} Pendientes
+                                                    </p>
+                                                </div>
+                                                <div className="mt-2 h-1 w-full max-w-[200px] bg-muted/30 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full bg-emerald-500 transition-all duration-1000"
+                                                        style={{ width: `${(event.stats.validated / (event.stats.sold || 1)) * 100}%` }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                         

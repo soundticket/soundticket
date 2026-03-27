@@ -109,20 +109,31 @@ export function StaffCheckinClient({ event, checkinToken, initialStats }: StaffC
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-end justify-between mb-2">
-                                    <div className="text-4xl font-black text-primary">
-                                        {initialStats.totalScanned} <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Entrados</span>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Validadas</p>
+                                        <p className="text-3xl font-black">{initialStats.totalScanned}</p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-bold text-muted-foreground uppercase">De {initialStats.totalSold}</p>
-                                        <p className="text-sm font-black">{Math.round((initialStats.totalScanned / (initialStats.totalSold || 1)) * 100)}%</p>
+                                    <div className="space-y-1 text-right">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-500">Pendientes</p>
+                                        <p className="text-3xl font-black">{initialStats.totalSold - initialStats.totalScanned}</p>
                                     </div>
                                 </div>
-                                <div className="h-3 bg-muted/50 rounded-full overflow-hidden border border-border/20">
-                                    <div 
-                                        className="h-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)] transition-all duration-1000"
-                                        style={{ width: `${(initialStats.totalScanned / (initialStats.totalSold || 1)) * 100}%` }}
-                                    />
+                                
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter opacity-60">
+                                        <span>Progreso Total</span>
+                                        <span>{Math.round((initialStats.totalScanned / (initialStats.totalSold || 1)) * 100)}%</span>
+                                    </div>
+                                    <div className="h-3 bg-muted/50 rounded-full overflow-hidden border border-border/20">
+                                        <div 
+                                            className="h-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)] transition-all duration-1000"
+                                            style={{ width: `${(initialStats.totalScanned / (initialStats.totalSold || 1)) * 100}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
+                                        Total de {initialStats.totalSold} entradas vendidas
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
