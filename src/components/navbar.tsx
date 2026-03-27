@@ -48,10 +48,10 @@ function ProfileDropdown({ authUser, dbUser, onSignOut }: { authUser: any; dbUse
                     </div>
                     <div className="py-1">
                         <a href="/profile" className="flex w-full items-center px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors gap-2">
-                            <User className="h-4 w-4" /> Ver Perfil
+                            <Ticket className="h-4 w-4" /> Mis Entradas
                         </a>
                         <a href="/profile/history" className="flex w-full items-center px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors gap-2">
-                            <Ticket className="h-4 w-4" /> Mis Entradas
+                            <User className="h-4 w-4" /> Historial
                         </a>
                     </div>
                     <div className="border-t border-border/50 py-1">
@@ -207,10 +207,10 @@ export function Navbar() {
                                     ) : authUser ? (
                                         <div className="flex flex-col gap-5 mt-2">
                                             <a href="/profile" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
-                                                <User className="h-5 w-5" /> Mi Perfil
+                                                <Ticket className="h-5 w-5" /> Mis Entradas
                                             </a>
                                             <a href="/profile/history" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
-                                                <Ticket className="h-5 w-5" /> Mis Entradas
+                                                <User className="h-5 w-5" /> Historial
                                             </a>
                                             <button 
                                                 onClick={() => { setIsOpen(false); handleSignOut(); }}
