@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CreditCard, Building, ShieldCheck, AlertCircle } from "lucide-react"
+import { CreditCard, Building, ShieldCheck, AlertCircle, Clock } from "lucide-react"
 
 export const dynamic = "force-dynamic";
 
@@ -95,14 +95,40 @@ export default async function BillingPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm text-muted-foreground">
-                        <p>
+                        <p className="mb-4">
                             Al operar como organizador verificado en SoundTicket, accedes a un sistema de cobros delegados sin intermediación letárgica:
                         </p>
-                        <ul className="list-disc pl-5 space-y-2">
+                        <ul className="list-disc pl-5 space-y-2 mb-6">
                             <li>Recibes el dinero del importe de tus entradas en tiempo real a medida que se venden (descontando comisiones de servicio).</li>
                             <li>SoundTicket retiene únicamente un <strong className="text-foreground">5% fijo</strong> en concepto de uso de plataforma y la cuota de la pasarela Stripe (aprox. 1.5% + 0.25€).</li>
                             <li>El control tecnológico y bancario, junto con el soporte para devoluciones, corre de parte de Stripe y tu panel transparente de analíticas.</li>
                         </ul>
+
+                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-4">
+                            <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-foreground flex items-center gap-2 mb-2">
+                                <Clock className="w-3.5 h-3.5 text-primary" /> Plazos de Cobro (Stripe)
+                            </h4>
+                            
+                            <div className="flex gap-3 items-start">
+                                <span className="text-xl leading-none">🟢</span>
+                                <div>
+                                    <p className="font-bold text-foreground text-xs uppercase tracking-tight">Cuentas Nuevas o Recientes</p>
+                                    <p className="text-[11px] leading-snug mt-0.5">
+                                        <strong>Primer pago: entre 7 y 14 días.</strong> Stripe retiene por riesgo inicial para verificar tu identidad y cuenta bancaria. Esto es totalmente normal.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 items-start">
+                                <span className="text-xl leading-none">🟡</span>
+                                <div>
+                                    <p className="font-bold text-foreground text-xs uppercase tracking-tight">Cuentas Verificadas</p>
+                                    <p className="text-[11px] leading-snug mt-0.5">
+                                        <strong>Pagos automáticos (España): 1–3 días laborables.</strong> Una vez superado el primer cobro, recibirás los fondos en tu banco (Santander, Revolut, BBVA, etc.) de forma recurrente.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
