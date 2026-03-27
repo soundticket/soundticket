@@ -279,8 +279,8 @@ export function StaffCheckinClient({ event, checkinToken, initialStats }: StaffC
                 )}
             </main>
 
-            {/* Bottom Tabs */}
-            <nav className="shrink-0 border-t border-border/40 bg-card/95 backdrop-blur-xl flex items-center justify-around p-2 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+            {/* Bottom Tabs - Raised slightly on mobile to avoid PWA banner overlap */}
+            <nav className="shrink-0 border-t border-border/40 bg-card/95 backdrop-blur-xl flex items-center justify-around p-2 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] md:pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.1)] relative z-50">
                 <button 
                     onClick={() => setActiveTab('stats')}
                     className={cn(
@@ -294,7 +294,7 @@ export function StaffCheckinClient({ event, checkinToken, initialStats }: StaffC
                 
                 <button 
                     onClick={() => setActiveTab('scanner')}
-                    className="relative -mt-8 flex flex-col items-center gap-1 active:scale-95 transition-transform"
+                    className="relative -mt-10 flex flex-col items-center gap-1 active:scale-95 transition-transform"
                 >
                     <div className={cn(
                         "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl",
