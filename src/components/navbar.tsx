@@ -206,12 +206,12 @@ export function Navbar() {
                                         <div className="h-10 w-full bg-muted/30 animate-pulse rounded-md mt-2" />
                                     ) : authUser ? (
                                         <div className="flex flex-col gap-5 mt-2">
-                                            <button onClick={() => { setIsOpen(false); window.location.href = '/profile'; }} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 text-left w-full">
+                                            <a href="/profile" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
                                                 <User className="h-5 w-5" /> Mi Perfil
-                                            </button>
-                                            <button onClick={() => { setIsOpen(false); window.location.href = '/profile/history'; }} className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 text-left w-full">
+                                            </a>
+                                            <a href="/profile/history" className="flex items-center gap-3 hover:text-primary transition-colors py-2 active:opacity-50 w-full">
                                                 <Ticket className="h-5 w-5" /> Mis Entradas
-                                            </button>
+                                            </a>
                                             <button 
                                                 onClick={() => { setIsOpen(false); handleSignOut(); }}
                                                 className="flex items-center gap-3 text-red-500 text-left hover:text-red-400 transition-colors py-2 w-full mt-2 active:opacity-50"
