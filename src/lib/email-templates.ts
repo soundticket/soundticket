@@ -89,7 +89,7 @@ export function purchaseConfirmationTemplate(data: PurchaseEmailData): string {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     })
     const timeStr = data.eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(data.ticketId)}&choe=UTF-8&chf=bg,s,ffffff`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.ticketId)}&format=png&margin=0`;
 
     return wrapper(`
     <h1 style="color: #ffffff; font-size: 26px; font-weight: 900; font-style: italic; margin: 0 0 8px;">
