@@ -35,9 +35,14 @@ export async function POST(req: Request) {
             }, { status: 403 });
         }
 
-        // Buscar el ticket
-        const ticket = await prisma.ticket.findUnique({
-            where: { qrToken },
+        // Buscar el ticket (soporta tanto el nuevo qrToken como el ID antiguo para máxima compatibilidad)
+        const ticket = await prisma.ticket.findFirst({
+            where: {
+                OR: [
+                    { qrToken: qrToken },
+                    { id: qrToken } // En caso de que se esté escaneando un QR antiguo que contiene el ID
+                ]
+            },
             include: { ticketType: true, order: true }
         });
 
