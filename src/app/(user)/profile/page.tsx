@@ -16,94 +16,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         redirect("/login")
     }
 
-    // fallback for webhooks: sync session if provided
-    if (session_id) {
-        try {
-            const session = await stripe.checkout.sessions.retrieve(session_id)
-            if (session.payment_status === 'paid') {
-                const { userId, ticketTypeId, eventId } = session.metadata as any
-
-                // check if order already exists
-                const existingOrder = await prisma.order.findUnique({
-                    where: { stripeSessionId: session.id }
-                })
-
-                if (!existingOrder) {
-                    const createdTicket = await prisma.$transaction(async (tx) => {
-                        const order = await tx.order.create({
-                            data: {
-                                userId,
-                                eventId,
-                                totalPrice: (session.amount_total || 0) / 100,
-                                status: 'PAID',
-                                stripeSessionId: session.id,
-                            }
-                        })
-
-                        const ticket = await tx.ticket.create({
-                            data: {
-                                orderId: order.id,
-                                ticketTypeId,
-                            }
-                        })
-
-                        await tx.ticketType.update({
-                            where: { id: ticketTypeId },
-                            data: { vendidos: { increment: 1 } }
-                        })
-                        
-                        return ticket
-                    })
-                    
-                    // Send confirmation email (Fallback trigger)
-                    try {
-                        if (process.env.RESEND_API_KEY) {
-                            const { resend } = await import('@/lib/resend')
-                            const { purchaseConfirmationTemplate } = await import('@/lib/email-templates')
-                            
-                            const ticketDetails = await prisma.ticket.findUnique({
-                                where: { id: createdTicket.id },
-                                include: {
-                                    order: { include: { user: true } },
-                                    ticketType: { include: { event: true } }
-                                }
-                            })
-
-                            if (ticketDetails?.order.user.email) {
-                                const event = ticketDetails.ticketType.event
-                                const user = ticketDetails.order.user
-                                const htmlContent = purchaseConfirmationTemplate({
-                                    userName: user.name || 'Usuario',
-                                    userEmail: user.email,
-                                    eventTitle: event.title,
-                                    eventLocation: event.location,
-                                    eventDate: event.startDate,
-                                    ticketTypeName: ticketDetails.ticketType.name,
-                                    ticketId: ticketDetails.id,
-                                    price: ticketDetails.order.totalPrice,
-                                    coverImage: event.coverImage || undefined
-                                })
-
-                                const isTestMode = false; // Desactivar bypass temporal de pruebas
-                                const recipientEmail = isTestMode ? 'onboarding@resend.dev' : user.email;
-
-                                await resend.emails.send({
-                                    from: 'SoundTicket <info@soundticket.es>',
-                                    to: [recipientEmail],
-                                    subject: `🎟️ Tu entrada para ${event.title}`,
-                                    html: htmlContent
-                                })
-                            }
-                        }
-                    } catch (emailError) {
-                        console.error('Error sending fallback email:', emailError)
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Session sync error:', error)
-        }
-    }
 
     const tickets = await prisma.ticket.findMany({
         where: {
@@ -132,18 +44,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
     return (
         <div className="space-y-8">
-            {session_id && (
-                <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 flex items-center gap-4 animate-in slide-in-from-top duration-500">
-                    <div className="bg-primary/20 p-3 rounded-full">
-                        <CheckCircle2 className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-lg">¡Compra completada con éxito!</h3>
-                        <p className="text-sm text-muted-foreground">Tu entrada ya está disponible a continuación.</p>
-                    </div>
-                </div>
-            )}
-
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Mis Entradas</h1>
                 <p className="text-muted-foreground">Aquí encontrarás tus entradas compradas y sus códigos QR.</p>

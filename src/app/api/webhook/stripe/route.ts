@@ -22,6 +22,9 @@ export async function POST(req: Request) {
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object as any
         const { userId, ticketTypeId, eventId } = session.metadata
+        const customerEmail = session.customer_details?.email
+        const customerName = session.customer_details?.name
+        const isGuest = userId === 'guest' || !userId
 
         try {
             // Use a transaction to ensure everything is created correctly
@@ -30,7 +33,9 @@ export async function POST(req: Request) {
                 // 1. Create the Order
                 const order = await tx.order.create({
                     data: {
-                        userId,
+                        userId: isGuest ? null : userId,
+                        guestEmail: isGuest ? customerEmail : null,
+                        guestName: isGuest ? customerName : null,
                         eventId,
                         totalPrice: session.amount_total / 100,
                         status: 'PAID',
@@ -74,12 +79,17 @@ export async function POST(req: Request) {
                         }
                     })
 
-                    if (ticketDetails?.order.user.email) {
+                    const recipientEmail = ticketDetails?.order.user?.email || ticketDetails?.order.guestEmail;
+                    
+                    if (recipientEmail && ticketDetails) {
                         const event = ticketDetails.ticketType.event
                         const user = ticketDetails.order.user
+                        const guestName = ticketDetails.order.guestName
+                        const recipientName = user?.name || guestName || 'Usuario'
+
                         const htmlContent = purchaseConfirmationTemplate({
-                            userName: user.name || 'Usuario',
-                            userEmail: user.email,
+                            userName: recipientName,
+                            userEmail: recipientEmail,
                             eventTitle: event.title,
                             eventLocation: event.location,
                             eventDate: event.startDate,
@@ -90,11 +100,11 @@ export async function POST(req: Request) {
                         })
 
                         const isTestMode = false; // Desactivar fallback; enviar al correo real
-                        const recipientEmail = isTestMode ? 'onboarding@resend.dev' : user.email;
+                        const targetEmail = isTestMode ? 'onboarding@resend.dev' : recipientEmail;
 
                         await resend.emails.send({
                             from: 'SoundTicket <info@soundticket.es>',
-                            to: [recipientEmail],
+                            to: [targetEmail],
                             subject: `🎟️ Tu entrada para ${event.title}`,
                             html: htmlContent
                         })

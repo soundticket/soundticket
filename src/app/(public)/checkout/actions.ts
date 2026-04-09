@@ -17,10 +17,6 @@ export async function createCheckoutSession(ticketTypeId: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-        return { error: 'Debes iniciar sesión para comprar entradas.' }
-    }
-
     try {
         const ticketType = await prisma.ticketType.findUnique({
             where: { id: ticketTypeId },
@@ -67,14 +63,14 @@ export async function createCheckoutSession(ticketTypeId: string) {
             payment_intent_data: {
                 application_fee_amount: applicationFeeAmount,
             },
-            success_url: `${await getBaseUrl()}/profile?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${await getBaseUrl()}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${await getBaseUrl()}/event/${ticketType.eventId}`,
             metadata: {
-                userId: user.id,
+                userId: user ? user.id : 'guest',
                 ticketTypeId: ticketType.id,
                 eventId: ticketType.event.id,
             },
-            customer_email: user.email,
+            ...(user?.email ? { customer_email: user.email } : {}),
         }, {
             stripeAccount: organizer.stripeAccountId,
         })
