@@ -4,13 +4,6 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
     try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-        }
-
         const body = await req.json();
         const { qrToken, eventId, checkinToken } = body;
 
@@ -18,7 +11,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: "Datos incompletos" }, { status: 400 });
         }
 
-        // 1. Verificar autorización (por Sesión o por Token de Check-in)
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // 1. Verificar existencia del evento
         const event = await prisma.event.findUnique({
             where: { id: eventId },
             select: { id: true, organizerId: true, checkinToken: true }
@@ -28,10 +24,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: "Evento no encontrado" }, { status: 404 });
         }
 
+        // 2. Verificar autorización (por Sesión o por Token de Check-in)
         const isOrganizer = user?.id === event.organizerId;
-        const isValidToken = checkinToken && checkinToken === event.checkinToken;
+        const isValidStaffToken = checkinToken && checkinToken === event.checkinToken;
 
-        if (!isOrganizer && !isValidToken) {
+        if (!isOrganizer && !isValidStaffToken) {
             return NextResponse.json({ 
                 success: false, 
                 error: "No autorizado. Debes ser el organizador o tener un enlace válido." 
