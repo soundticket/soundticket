@@ -15,6 +15,7 @@ import {
 interface TicketCardProps {
     ticket: {
         id: string
+        qrToken: string
         ticketType: {
             name: string
             event: {
@@ -86,7 +87,7 @@ export function TicketCard({ ticket }: TicketCardProps) {
                     <DialogTrigger 
                         render={
                             <div className="flex flex-col items-center justify-center py-6 bg-white/5 rounded-2xl border border-white/10 cursor-zoom-in hover:bg-white/10 transition-colors group/qr relative overflow-hidden">
-                                <QRCodeImage text={ticket.id} size={160} />
+                                <QRCodeImage text={ticket.qrToken} size={160} />
                                 <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-[0.2em]">ID: {ticket.id.substring(0, 8)}...</p>
                                 <div className="absolute bottom-2 right-2 opacity-0 group-hover/qr:opacity-100 transition-opacity">
                                     <Maximize2 className="h-3 w-3 text-muted-foreground" />
@@ -105,7 +106,7 @@ export function TicketCard({ ticket }: TicketCardProps) {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl mt-4">
-                            <QRCodeImage text={ticket.id} size={250} />
+                            <QRCodeImage text={ticket.qrToken} size={250} />
                         </div>
                         <div className="mt-6 text-center">
                             <p className="text-xs font-mono text-muted-foreground break-all">{ticket.id}</p>

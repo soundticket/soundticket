@@ -95,6 +95,7 @@ export async function POST(req: Request) {
                             eventDate: event.startDate,
                             ticketTypeName: ticketDetails.ticketType.name,
                             ticketId: ticketDetails.id,
+                            qrToken: ticketDetails.qrToken,
                             price: ticketDetails.order.totalPrice,
                             coverImage: event.coverImage || undefined
                         })
