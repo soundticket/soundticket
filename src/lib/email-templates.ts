@@ -91,79 +91,128 @@ export function purchaseConfirmationTemplate(data: PurchaseEmailData): string {
     })
     const timeStr = data.eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.qrToken)}&format=png&margin=10&bgcolor=ffffff&color=000000&qzone=1`;
+    // Nunca enviar localhost en emails — siempre usar la URL de producción
+    const rawBase = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundticket.es'
+    const baseUrl = rawBase.includes('localhost') || rawBase.includes('127.0.0.1')
+        ? 'https://soundticket.es'
+        : rawBase
 
     return wrapper(`
-    <h1 style="color: #ffffff; font-size: 26px; font-weight: 900; font-style: italic; margin: 0 0 8px;">
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 900; font-style: italic; margin: 0 0 8px;">
       ¡Entrada confirmada! 🎫
     </h1>
-    <p style="color: #aaaaaa; font-size: 15px; margin: 0 0 32px;">
+    <p style="color: #aaaaaa; font-size: 15px; margin: 0 0 28px; line-height: 1.6;">
       Hola <strong style="color: #ffffff;">${data.userName}</strong>, todo listo. Tu pase directo a la fiesta está aquí.
     </p>
 
-    <!-- Código QR Embebido -->
-    <!-- Usamos table + bgcolor para que los clientes de email no puedan sobreescribir el fondo en dark mode -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom: 32px;">
+    <!-- QR Block — tabla para compatibilidad dark-mode email -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom: 28px;">
       <tr>
-        <td bgcolor="#ffffff" style="background-color: #ffffff !important; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);">
-          <p style="color: #8B5CF6; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px;">Preséntalo en la puerta</p>
-          <!-- La imagen ya lleva bgcolor=ffffff y color=000000 en la URL: siempre es blanco+negro sin importar el tema del dispositivo -->
+        <td bgcolor="#ffffff" align="center"
+            style="background-color: #ffffff !important; border-radius: 16px; padding: 24px 20px;">
+          <p style="color: #8B5CF6; font-size: 11px; font-weight: 900; text-transform: uppercase;
+                     letter-spacing: 2px; margin: 0 0 14px; font-family: Helvetica, Arial, sans-serif;">
+            Preséntalo en la puerta
+          </p>
           <img src="${qrUrl}" alt="Código QR de entrada" width="200" height="200"
                style="width: 200px; height: 200px; display: block; margin: 0 auto;
-                      border: 8px solid #ffffff; border-radius: 8px;"
-               bgcolor="#ffffff" />
-          <p style="color: #555555; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; font-family: monospace; margin: 16px 0 0;">ID: ${data.ticketId.substring(0, 12)}...</p>
+                      border: 8px solid #ffffff; border-radius: 8px;" />
+          <p style="color: #777777; font-size: 10px; text-transform: uppercase; letter-spacing: 3px;
+                     font-family: monospace; margin: 14px 0 0;">
+            ID: ${data.ticketId.substring(0, 12)}...
+          </p>
         </td>
       </tr>
     </table>
 
     ${data.coverImage ? `
-    <div style="border-radius: 12px; overflow: hidden; margin-bottom: 24px; max-height: 220px;">
-      <img src="${data.coverImage}" alt="${data.eventTitle}" style="width: 100%; object-fit: cover; display: block;" />
-    </div>
+    <!-- Cover Image: sin max-height ni object-fit (no soportados en clientes de email) -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom: 24px;">
+      <tr>
+        <td style="line-height: 0; border-radius: 12px; overflow: hidden;">
+          <img src="${data.coverImage}" alt="${data.eventTitle}"
+               width="100%"
+               style="width: 100%; height: auto; display: block; border-radius: 12px;" />
+        </td>
+      </tr>
+    </table>
     ` : ''}
 
-    <!-- Event Card -->
-    <div style="background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <p style="color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 4px;">Evento</p>
-          <p style="color: #ffffff; font-size: 20px; font-weight: 900; font-style: italic; margin: 0;">${data.eventTitle}</p>
-        </div>
-        <div style="background: #8B5CF622; border: 1px solid #8B5CF644; border-radius: 6px; padding: 6px 14px; white-space: nowrap;">
-          <span style="color: #8B5CF6; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${data.ticketTypeName}</span>
-        </div>
-      </div>
+    <!-- Event Card — tabla en lugar de flex para evitar solapamientos en móvil -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
+           style="background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 12px; margin-bottom: 24px;">
+      <tr>
+        <td style="padding: 20px 20px 0 20px;">
+          <!-- Fila etiqueta EVENTO -->
+          <p style="color: #555555; font-size: 10px; text-transform: uppercase;
+                     letter-spacing: 2px; margin: 0 0 4px; font-family: Helvetica, Arial, sans-serif;">Evento</p>
+          <!-- Nombre del evento -->
+          <p style="color: #ffffff; font-size: 18px; font-weight: 900; font-style: italic;
+                     margin: 0 0 10px; line-height: 1.3;">${data.eventTitle}</p>
+          <!-- Badge tipo entrada (debajo del nombre, no al lado) -->
+          <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom: 18px;">
+            <tr>
+              <td bgcolor="#8B5CF622" style="background-color: #1e1535; border: 1px solid #8B5CF644;
+                            border-radius: 6px; padding: 5px 12px;">
+                <span style="color: #8B5CF6; font-weight: 900; font-size: 11px;
+                              text-transform: uppercase; letter-spacing: 1px;">${data.ticketTypeName}</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- Fecha -->
+      <tr>
+        <td style="padding: 0 20px 14px 20px; border-top: 1px solid #1e1e1e;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-top:14px;">
+            <tr>
+              <td width="28" valign="top" style="padding-top: 2px; font-size: 16px;">📅</td>
+              <td valign="top">
+                <p style="color: #555555; font-size: 10px; text-transform: uppercase;
+                           letter-spacing: 1px; margin: 0; font-family: Helvetica, Arial, sans-serif;">Fecha y hora</p>
+                <p style="color: #cccccc; font-size: 13px; margin: 3px 0 0; text-transform: capitalize;
+                           line-height: 1.4;">${dateStr} · ${timeStr}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- Ubicación -->
+      <tr>
+        <td style="padding: 0 20px 20px 20px; border-top: 1px solid #1e1e1e;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-top:14px;">
+            <tr>
+              <td width="28" valign="top" style="padding-top: 2px; font-size: 16px;">📍</td>
+              <td valign="top">
+                <p style="color: #555555; font-size: 10px; text-transform: uppercase;
+                           letter-spacing: 1px; margin: 0; font-family: Helvetica, Arial, sans-serif;">Ubicación</p>
+                <p style="color: #cccccc; font-size: 13px; margin: 3px 0 0; line-height: 1.4;">${data.eventLocation}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-      <div style="margin-top: 20px; display: grid; gap: 12px;">
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <span style="color: #8B5CF6; font-size: 16px;">📅</span>
-          <div>
-            <p style="color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Fecha y hora</p>
-            <p style="color: #cccccc; font-size: 14px; margin: 2px 0 0; text-transform: capitalize;">${dateStr} · ${timeStr}</p>
-          </div>
-        </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <span style="color: #8B5CF6; font-size: 16px;">📍</span>
-          <div>
-            <p style="color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Ubicación</p>
-            <p style="color: #cccccc; font-size: 14px; margin: 2px 0 0;">${data.eventLocation}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Price Row -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
+           style="border-top: 1px solid #1e1e1e; margin-bottom: 28px;">
+      <tr>
+        <td valign="middle" style="padding: 16px 0;">
+          <span style="color: #aaaaaa; font-size: 14px;">Total pagado</span>
+        </td>
+        <td valign="middle" align="right" style="padding: 16px 0;">
+          <span style="color: #ffffff; font-size: 22px; font-weight: 900; font-style: italic;">${data.price.toFixed(2)} €</span>
+        </td>
+      </tr>
+    </table>
 
-    <!-- Price -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid #1e1e1e;">
-      <span style="color: #aaaaaa; font-size: 14px;">Total pagado</span>
-      <span style="color: #ffffff; font-size: 22px; font-weight: 900; font-style: italic;">${data.price.toFixed(2)} €</span>
-    </div>
-
-    <div style="text-align: center; margin: 28px 0 0;">
-      <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://soundticket.es'}/profile"
+    <div style="text-align: center; margin: 0 0 8px;">
+      <a href="${baseUrl}/profile"
          style="display: inline-block; background: #8B5CF6; color: #ffffff; padding: 14px 36px;
                 text-decoration: none; font-weight: 900; font-size: 14px; letter-spacing: 1px;
                 border-radius: 8px; text-transform: uppercase; box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.39);">
-        Ver mi perfil web
+        Ver mi perfil
       </a>
     </div>
   `)

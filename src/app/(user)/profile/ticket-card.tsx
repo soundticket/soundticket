@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { QRCodeImage } from "@/components/qr-code"
-import { CalendarDays, MapPin, Maximize2, QrCode } from "lucide-react"
+import { CalendarDays, MapPin, Maximize2, QrCode, CheckCircle2 } from "lucide-react"
 import {
     Dialog,
     DialogContent,
@@ -16,6 +16,7 @@ interface TicketCardProps {
     ticket: {
         id: string
         qrToken: string
+        isScanned?: boolean
         ticketType: {
             name: string
             event: {
@@ -26,9 +27,12 @@ interface TicketCardProps {
             }
         }
     }
+    isScanned?: boolean
 }
 
-export function TicketCard({ ticket }: TicketCardProps) {
+export function TicketCard({ ticket, isScanned }: TicketCardProps) {
+    const scanned = isScanned ?? ticket.isScanned ?? false
+
     const formattedDate = ticket.ticketType.event.startDate.toLocaleString('es-ES', {
         day: '2-digit',
         month: '2-digit',
@@ -38,9 +42,9 @@ export function TicketCard({ ticket }: TicketCardProps) {
     })
 
     return (
-        <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-xl flex flex-col shadow-2xl group hover:border-primary/50 transition-all">
+        <Card className={`overflow-hidden border-border/50 bg-card/50 backdrop-blur-xl flex flex-col shadow-2xl group transition-all ${scanned ? 'opacity-60 grayscale' : 'hover:border-primary/50'}`}>
             <Dialog>
-                <DialogTrigger 
+                <DialogTrigger
                     render={
                         <div className="relative aspect-[16/9] overflow-hidden cursor-zoom-in group">
                             <img
@@ -49,9 +53,18 @@ export function TicketCard({ ticket }: TicketCardProps) {
                                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                            <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-md p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Maximize2 className="h-4 w-4 text-white" />
-                            </div>
+                            {/* Overlay "Ya validada" sobre la imagen */}
+                            {scanned && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+                                    <CheckCircle2 className="h-10 w-10 text-emerald-400 mb-2" />
+                                    <span className="text-emerald-400 font-black text-sm uppercase tracking-widest">Check-in realizado</span>
+                                </div>
+                            )}
+                            {!scanned && (
+                                <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-md p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Maximize2 className="h-4 w-4 text-white" />
+                                </div>
+                            )}
                         </div>
                     }
                 />
@@ -65,10 +78,10 @@ export function TicketCard({ ticket }: TicketCardProps) {
             </Dialog>
 
             <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl font-bold">{ticket.ticketType.event.title}</CardTitle>
-                    <span className="bg-primary/20 text-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">
-                        {ticket.ticketType.name}
+                <div className="flex justify-between items-start gap-2">
+                    <CardTitle className="text-xl font-bold leading-tight">{ticket.ticketType.event.title}</CardTitle>
+                    <span className={`shrink-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${scanned ? 'bg-emerald-500/20 text-emerald-400' : 'bg-primary/20 text-primary'}`}>
+                        {scanned ? '✓ Validada' : ticket.ticketType.name}
                     </span>
                 </div>
                 <CardDescription className="flex items-center gap-2">
@@ -83,36 +96,48 @@ export function TicketCard({ ticket }: TicketCardProps) {
                     {ticket.ticketType.event.location}
                 </div>
 
-                <Dialog>
-                    <DialogTrigger 
-                        render={
-                            <div className="flex flex-col items-center justify-center py-6 bg-white/5 rounded-2xl border border-white/10 cursor-zoom-in hover:bg-white/10 transition-colors group/qr relative overflow-hidden">
-                                <QRCodeImage text={ticket.qrToken} size={160} />
-                                <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-[0.2em]">ID: {ticket.id.substring(0, 8)}...</p>
-                                <div className="absolute bottom-2 right-2 opacity-0 group-hover/qr:opacity-100 transition-opacity">
-                                    <Maximize2 className="h-3 w-3 text-muted-foreground" />
+                {/* QR — si está validada, mostrar estado en lugar del QR escaneable */}
+                {scanned ? (
+                    <div className="flex flex-col items-center justify-center py-6 bg-emerald-500/5 rounded-2xl border border-emerald-500/20">
+                        <CheckCircle2 className="h-12 w-12 text-emerald-400 mb-3" />
+                        <p className="text-emerald-400 font-black text-sm uppercase tracking-widest mb-1">Entrada ya validada</p>
+                        <p className="text-xs text-muted-foreground text-center px-4">
+                            Este código QR ya fue escaneado en la puerta del evento.
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-[0.2em] font-mono">ID: {ticket.id.substring(0, 8)}...</p>
+                    </div>
+                ) : (
+                    <Dialog>
+                        <DialogTrigger
+                            render={
+                                <div className="flex flex-col items-center justify-center py-6 bg-white/5 rounded-2xl border border-white/10 cursor-zoom-in hover:bg-white/10 transition-colors group/qr relative overflow-hidden">
+                                    <QRCodeImage text={ticket.qrToken} size={160} />
+                                    <p className="text-[10px] text-muted-foreground mt-4 uppercase tracking-[0.2em]">ID: {ticket.id.substring(0, 8)}...</p>
+                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover/qr:opacity-100 transition-opacity">
+                                        <Maximize2 className="h-3 w-3 text-muted-foreground" />
+                                    </div>
                                 </div>
+                            }
+                        />
+                        <DialogContent className="sm:max-w-[400px] bg-card border-border/50 p-8">
+                            <DialogHeader>
+                                <DialogTitle className="text-center flex items-center justify-center gap-2">
+                                    <QrCode className="h-5 w-5 text-primary" />
+                                    Entrada Digital
+                                </DialogTitle>
+                                <DialogDescription className="text-center">
+                                    Presenta este código en la entrada del evento
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl mt-4">
+                                <QRCodeImage text={ticket.qrToken} size={250} />
                             </div>
-                        }
-                    />
-                    <DialogContent className="sm:max-w-[400px] bg-card border-border/50 p-8">
-                        <DialogHeader>
-                            <DialogTitle className="text-center flex items-center justify-center gap-2">
-                                <QrCode className="h-5 w-5 text-primary" />
-                                Entrada Digital
-                            </DialogTitle>
-                            <DialogDescription className="text-center">
-                                Presenta este código en la entrada del evento
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl mt-4">
-                            <QRCodeImage text={ticket.qrToken} size={250} />
-                        </div>
-                        <div className="mt-6 text-center">
-                            <p className="text-xs font-mono text-muted-foreground break-all">{ticket.id}</p>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                            <div className="mt-6 text-center">
+                                <p className="text-xs font-mono text-muted-foreground break-all">{ticket.id}</p>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </CardContent>
         </Card>
     )
