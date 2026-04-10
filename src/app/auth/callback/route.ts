@@ -37,6 +37,18 @@ export async function GET(request: Request) {
                         organizerStatus: 'NONE'
                     } as any,
                 })
+
+                // Vincular órdenes de invitado al usuario de Google
+                if (user.email) {
+                    const linked = await prisma.order.updateMany({
+                        where: { guestEmail: user.email, userId: null, status: 'PAID' },
+                        data: { userId: user.id, guestEmail: null, guestName: null },
+                    })
+                    if (linked.count > 0) {
+                        console.log(`[OAuth] Vinculadas ${linked.count} órdenes guest de ${user.email} al usuario ${user.id}`)
+                    }
+                }
+
                 console.log('Prisma sync successful via Google Callback for:', user.email)
             } catch (dbError) {
                 console.error('Error syncing user with Prisma in callback (ignored to allow login):', dbError)

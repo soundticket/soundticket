@@ -26,6 +26,35 @@ const translateError = (error: string): string => {
     return error // Fallback to original if not mapped
 }
 
+/**
+ * Linkea las órdenes de invitado (guestEmail) al usuario recién autenticado.
+ * Se ejecuta silenciosamente en login, registro y OAuth para que el usuario
+ * siempre vea las entradas que compró antes de tener cuenta.
+ */
+async function linkGuestOrders(userId: string, email: string): Promise<void> {
+    try {
+        const result = await prisma.order.updateMany({
+            where: {
+                guestEmail: email,
+                userId: null,          // Solo órdenes todavía no vinculadas
+                status: 'PAID',
+            },
+            data: {
+                userId,
+                guestEmail: null,      // Limpiamos el campo guest una vez vinculado
+                guestName: null,
+            },
+        })
+        if (result.count > 0) {
+            console.log(`[linkGuestOrders] Vinculadas ${result.count} órdenes guest de ${email} al usuario ${userId}`)
+        }
+    } catch (err) {
+        // No bloqueamos el login si esto falla
+        console.error('[linkGuestOrders] Error al vincular órdenes guest:', err)
+    }
+}
+
+
 export async function loginWithGoogle() {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -108,6 +137,9 @@ export async function login(formData: FormData) {
         }
 
         console.log('User verified in Prisma, allowing access:', user.id)
+
+        // Linkeamos las entradas compradas como invitado con este email
+        await linkGuestOrders(user.id, user.email!)
     }
 
     return redirect('/profile')
@@ -186,6 +218,9 @@ export async function signup(formData: FormData) {
         })
         console.log('Prisma sync successful')
         prismaSuccess = true
+
+        // Linkeamos inmediatamente las entradas compradas como invitado
+        await linkGuestOrders(data.user.id, email)
     } catch (dbError: any) {
         console.error('Error during Prisma sync:', dbError)
         // Clean up Supabase user if Prisma fails
