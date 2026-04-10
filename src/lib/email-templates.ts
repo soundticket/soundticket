@@ -90,7 +90,7 @@ export function purchaseConfirmationTemplate(data: PurchaseEmailData): string {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     })
     const timeStr = data.eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.qrToken)}&format=png&margin=0`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.qrToken)}&format=png&margin=10&bgcolor=ffffff&color=000000&qzone=1`;
 
     return wrapper(`
     <h1 style="color: #ffffff; font-size: 26px; font-weight: 900; font-style: italic; margin: 0 0 8px;">
@@ -101,11 +101,20 @@ export function purchaseConfirmationTemplate(data: PurchaseEmailData): string {
     </p>
 
     <!-- Código QR Embebido -->
-    <div style="background: #ffffff; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);">
-        <p style="color: #8B5CF6; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px;">Preséntalo en la puerta</p>
-        <img src="${qrUrl}" alt="Código QR" style="width: 200px; height: 200px; margin: 0 auto; display: block;" />
-        <p style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; font-family: monospace; margin: 16px 0 0;">ID: ${data.ticketId.substring(0, 12)}...</p>
-    </div>
+    <!-- Usamos table + bgcolor para que los clientes de email no puedan sobreescribir el fondo en dark mode -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom: 32px;">
+      <tr>
+        <td bgcolor="#ffffff" style="background-color: #ffffff !important; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);">
+          <p style="color: #8B5CF6; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px;">Preséntalo en la puerta</p>
+          <!-- La imagen ya lleva bgcolor=ffffff y color=000000 en la URL: siempre es blanco+negro sin importar el tema del dispositivo -->
+          <img src="${qrUrl}" alt="Código QR de entrada" width="200" height="200"
+               style="width: 200px; height: 200px; display: block; margin: 0 auto;
+                      border: 8px solid #ffffff; border-radius: 8px;"
+               bgcolor="#ffffff" />
+          <p style="color: #555555; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; font-family: monospace; margin: 16px 0 0;">ID: ${data.ticketId.substring(0, 12)}...</p>
+        </td>
+      </tr>
+    </table>
 
     ${data.coverImage ? `
     <div style="border-radius: 12px; overflow: hidden; margin-bottom: 24px; max-height: 220px;">
