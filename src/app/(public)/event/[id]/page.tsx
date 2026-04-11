@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, MapPin, Users, Share2, Heart, Clock, Ticket as TicketIcon } from "lucide-react";
+import { CalendarDays, MapPin, Users, Clock, Ticket as TicketIcon } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { TicketSelector } from "@/components/ticket-selector";
 import { EventActions } from "@/components/event-actions";
+import { EventCoverLightbox } from "@/components/event-cover-lightbox";
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -55,12 +56,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         <div className="min-h-screen pb-20">
             {/* Hero Header */}
             <div className="relative h-[50vh] min-h-[400px] w-full">
-                <img
+                <EventCoverLightbox
                     src={event.coverImage || `https://images.unsplash.com/photo-1540039155732-d674d40d12ce?q=80&w=1200&auto=format&fit=crop`}
                     alt={event.title}
-                    className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
 
                 <div className="absolute bottom-0 left-0 w-full p-4 md:p-8">
                     <div className="container mx-auto">
