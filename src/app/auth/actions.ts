@@ -517,7 +517,8 @@ export async function approveEvent(eventId: string) {
         where: { id: eventId },
         data: {
             status: 'APPROVED',
-            isPublished: true
+            isPublished: true,
+            isModification: false,
         } as any,
         include: { organizer: true }
     })
@@ -556,7 +557,8 @@ export async function rejectEvent(eventId: string, reason: string) {
         data: {
             status: 'REJECTED',
             rejectionReason: reason,
-            isPublished: false
+            isPublished: false,
+            isModification: false,
         } as any,
         include: { organizer: true }
     })
@@ -699,7 +701,8 @@ export async function updateEvent(eventId: string, formData: FormData) {
             startDate: startDateTime,
             endDate: endDateTime,
             status: 'PENDING',
-            isPublished: false
+            isPublished: false,
+            isModification: true,
         }
 
         if (coverImageUrl) {
@@ -714,11 +717,31 @@ export async function updateEvent(eventId: string, formData: FormData) {
         const { revalidatePath } = await import('next/cache')
         revalidatePath('/dashboard/events')
         revalidatePath('/explore')
-        
+        revalidatePath(`/event/${eventId}`)
+
         success = true;
     } catch (err) {
         console.error("Update event error", err)
         return redirect(`/dashboard/events/${eventId}/edit?error=Error+al+actualizar`)
+    }
+
+    // Notify admin by email (fire-and-forget, don't block redirect)
+    if (success && process.env.RESEND_API_KEY) {
+        try {
+            const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { name: true } })
+            const adminEmail = process.env.ADMIN_EMAIL || 'vikfaded@gmail.com'
+            const { resend } = await import('@/lib/resend')
+            const { eventModifiedAdminTemplate } = await import('@/lib/email-templates')
+            const adminPanelUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://soundticket.es'}/admin/events`
+            await resend.emails.send({
+                from: 'SoundTicket <info@soundticket.es>',
+                to: [adminEmail],
+                subject: `✏️ Evento modificado — revisión necesaria: ${event.title}`,
+                html: eventModifiedAdminTemplate(event.title, dbUser?.name || 'Organizador', adminPanelUrl)
+            })
+        } catch (emailErr) {
+            console.error('Failed to send admin modification email:', emailErr)
+        }
     }
 
     if (success) {

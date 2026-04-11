@@ -50,6 +50,7 @@ model Event {
   ticketTypes     TicketType[]
   startedEmailSent DateTime?
   endedEmailSent   DateTime?
+  isModification   Boolean      @default(false)
 }
 
 model TicketType {

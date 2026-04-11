@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Ticket, Check, X, Eye, MessageSquare } from "lucide-react"
+import { Calendar, MapPin, Ticket, Check, X, Eye, MessageSquare, Pencil } from "lucide-react"
 import { approveEvent, rejectEvent } from "@/app/auth/actions"
 import { toast } from "sonner"
 import {
@@ -82,9 +82,17 @@ export default function AdminEventsPage({ events }: { events: any[] }) {
                         <Card key={event.id} className="bg-card/40 backdrop-blur-md border-border/50 shadow-xl overflow-hidden hover:border-primary/20 transition-colors">
                             <div className="flex flex-col md:flex-row p-6 gap-6">
                                 <div className="flex-1 space-y-4">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 flex-wrap">
                                         <h2 className="text-xl font-bold">{event.title}</h2>
-                                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 uppercase text-[10px] font-black">Pendiente</Badge>
+                                        {event.isModification ? (
+                                            <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30 uppercase text-[10px] font-black gap-1">
+                                                <Pencil className="w-2.5 h-2.5" /> Modificación
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 uppercase text-[10px] font-black">
+                                                Nuevo
+                                            </Badge>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
@@ -102,8 +110,15 @@ export default function AdminEventsPage({ events }: { events: any[] }) {
                                         <p className="text-sm line-clamp-2 italic">"{event.description}"</p>
                                     </div>
 
+                                    {event.isModification && (
+                                        <div className="flex items-center gap-2 text-xs text-blue-400 bg-blue-500/5 border border-blue-500/20 rounded-lg px-3 py-2">
+                                            <Pencil className="w-3 h-3 shrink-0" />
+                                            <span>Este evento ya estaba publicado. Revisa los cambios antes de aprobar.</span>
+                                        </div>
+                                    )}
+
                                     <div className="flex flex-wrap gap-2">
-                                        {event.ticketTypes.map((tt: any) => (
+                                        {event.ticketTypes?.map((tt: any) => (
                                             <Badge key={tt.id} variant="secondary" className="bg-primary/5 text-primary border-primary/10">
                                                 {tt.name}: {tt.price}€ ({tt.totalDisponibles} uds)
                                             </Badge>

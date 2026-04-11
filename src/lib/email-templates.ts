@@ -340,3 +340,34 @@ export function eventSoldOutTemplate(title: string): string {
   </div>
 `)
 }
+
+// ── 7. Admin — Event Modified Notification ────────────────────
+export function eventModifiedAdminTemplate(eventTitle: string, organizerName: string, adminPanelUrl: string): string {
+  return wrapper(`
+  <h1 style="color: #ffffff; font-size: 26px; font-weight: 900; font-style: italic; margin: 0 0 16px;">
+    Evento modificado — revisión necesaria ✏️
+  </h1>
+  <p style="color: #aaaaaa; font-size: 16px; line-height: 1.7; margin: 0 0 24px;">
+    El organizador <strong style="color: #ffffff;">${organizerName}</strong> ha editado un evento que ya estaba aprobado y publicado. Necesita tu revisión para volver a estar visible.
+  </p>
+
+  <div style="background: #1a1025; border: 1px solid #8B5CF644; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;">
+    <p style="color: #8B5CF6; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 6px; font-family: Helvetica, Arial, sans-serif;">Evento modificado</p>
+    <p style="color: #ffffff; font-size: 18px; font-weight: 900; font-style: italic; margin: 0;">${eventTitle}</p>
+  </div>
+
+  <p style="color: #aaaaaa; font-size: 14px; line-height: 1.6; margin-bottom: 28px;">
+    El evento ha quedado en estado <strong style="color: #f59e0b;">PENDIENTE</strong> y no es visible al público hasta que lo apruebes. Los compradores existentes <strong style="color: #ffffff;">conservan sus entradas</strong>.
+  </p>
+
+  <div style="text-align: center; margin: 0 0 12px;">
+    <a href="${adminPanelUrl}"
+       style="display: inline-block; background: #8B5CF6; color: #ffffff; padding: 16px 40px;
+              text-decoration: none; font-weight: 900; font-size: 15px; letter-spacing: 1px;
+              border-radius: 8px; text-transform: uppercase; box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.39);">
+      Revisar en el panel
+    </a>
+  </div>
+`)
+}
+
