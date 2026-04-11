@@ -46,6 +46,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         minute: '2-digit'
     });
 
+    const endTime = event.endDate.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
     return (
         <div className="min-h-screen pb-20">
             {/* Hero Header */}
@@ -105,7 +110,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                                         <h3 className="font-bold text-lg capitalize">{startDate}</h3>
                                         <div className="flex items-center text-muted-foreground">
                                             <Clock className="h-4 w-4 mr-2" />
-                                            <span>{startTime} h</span>
+                                            <span>{startTime} – {endTime} h</span>
                                         </div>
                                     </div>
                                 </div>
