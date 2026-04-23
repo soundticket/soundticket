@@ -66,7 +66,7 @@ export function TicketSelector({ ticketTypes, eventId }: TicketSelectorProps) {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">
-                                {isSoldOut ? 'AGOTADO' : `Disponibles: ${type.totalDisponibles - type.vendidos} / ${type.totalDisponibles}`}
+                                {isSoldOut ? 'AGOTADO' : 'Disponible'}
                             </span>
                             {!isSoldOut && !isLoading && (
                                 <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
