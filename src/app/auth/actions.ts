@@ -310,14 +310,29 @@ export async function requestOrganizerStatus(formData: FormData) {
 
     const bio = formData.get('bio') as string
 
-    // Save the bio and update status to PENDING
-    await (prisma.user as any).update({
-        where: { id: user.id },
-        data: {
-            organizerStatus: 'PENDING',
-            organizerBio: bio
-        } as any
-    })
+    try {
+        await (prisma.user as any).upsert({
+            where: { id: user.id },
+            update: {
+                organizerStatus: 'PENDING',
+                organizerBio: bio
+            },
+            create: {
+                id: user.id,
+                email: user.email!,
+                name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || '',
+                lastName: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
+                isVerified: true,
+                organizerStatus: 'PENDING',
+                organizerBio: bio,
+                role: 'USER'
+            }
+        })
+    } catch (error) {
+        console.error('Error in requestOrganizerStatus:', error)
+        // If an error happens, we can return plain response or redirect to error to avoid hard crashes
+        return redirect('/profile/organizer-request?error=No+se+pudo+enviar+la+solicitud')
+    }
 
     return redirect('/profile/organizer-request')
 }
