@@ -311,6 +311,14 @@ export async function requestOrganizerStatus(formData: FormData) {
     const bio = formData.get('bio') as string
 
     try {
+        if (user.email) {
+            const existingByEmail = await prisma.user.findUnique({ where: { email: user.email } })
+            if (existingByEmail && existingByEmail.id !== user.id) {
+                console.warn('Auto-healing: Found ghost Prisma account in Organizer Request, deleting to resolve conflict.')
+                await prisma.user.delete({ where: { id: existingByEmail.id } })
+            }
+        }
+
         await (prisma.user as any).upsert({
             where: { id: user.id },
             update: {
@@ -328,10 +336,12 @@ export async function requestOrganizerStatus(formData: FormData) {
                 role: 'USER'
             }
         })
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error in requestOrganizerStatus:', error)
-        // If an error happens, we can return plain response or redirect to error to avoid hard crashes
-        return redirect('/profile/organizer-request?error=No+se+pudo+enviar+la+solicitud')
+        // Check if it's a redirect error (shouldn't be, but just in case)
+        if (error?.message?.includes('NEXT_REDIRECT')) throw error;
+        
+        return redirect(`/profile/organizer-request?error=Fallo+en+BD:+${encodeURIComponent(error?.message || 'Error desconocido')}`)
     }
 
     return redirect('/profile/organizer-request')
