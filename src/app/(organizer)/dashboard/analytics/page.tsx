@@ -59,7 +59,7 @@ export default async function AnalyticsPage() {
         let eventPlatformFee = 0;
         let eventStripeFee = 0;
 
-        event.ticketTypes.forEach(tt => {
+        event.ticketTypes.forEach((tt: any) => {
             const sold = (tt as any)._count.tickets;
             const validated = tt.tickets.length;
             
