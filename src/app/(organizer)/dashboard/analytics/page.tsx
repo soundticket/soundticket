@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
 import prisma from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { BarChart3, Ticket, WalletCards, Percent, Info, Calendar } from "lucide-react"
+import { BarChart3, Ticket, WalletCards, Percent, Info, Calendar, Users } from "lucide-react"
 
 export default async function AnalyticsPage() {
     const supabase = await createClient()
@@ -12,23 +12,38 @@ export default async function AnalyticsPage() {
         redirect("/login")
     }
 
-    const events = await prisma.event.findMany({
-        where: { organizerId: user.id },
-        include: {
-            ticketTypes: {
-                include: {
-                    _count: {
-                        select: { tickets: true }
-                    },
-                    tickets: {
-                        where: { isScanned: true },
-                        select: { id: true }
-                    }
+    const includeTickets = {
+        ticketTypes: {
+            include: {
+                _count: { select: { tickets: true } },
+                tickets: {
+                    where: { isScanned: true },
+                    select: { id: true }
                 }
             }
-        },
+        }
+    }
+
+    // Own events
+    const ownEvents = await prisma.event.findMany({
+        where: { organizerId: user.id },
+        include: includeTickets,
         orderBy: { startDate: 'desc' }
     })
+
+    // Co-organized events
+    const coOrgRows = await (prisma.eventCoOrganizer as any).findMany({
+        where: { userId: user.id },
+        include: { event: { include: includeTickets } },
+        orderBy: { createdAt: 'desc' }
+    })
+    const coOrgEvents = coOrgRows.map((row: any) => ({ ...row.event, isCoOrg: true }))
+
+    const events = [
+        ...ownEvents.map((e: any) => ({ ...e, isCoOrg: false })),
+        ...coOrgEvents
+    ]
+
 
     // Matemáticas globales
     let totalGross = 0;

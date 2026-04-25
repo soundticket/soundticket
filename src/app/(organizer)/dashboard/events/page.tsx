@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Plus, Ticket, Calendar, Edit, Trash2, ScanLine } from "lucide-react"
+import { Plus, Ticket, Calendar, Edit, Trash2, ScanLine, Users } from "lucide-react"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import { createClient } from "@/utils/supabase/server"
@@ -18,23 +18,36 @@ export default async function OrganizerEventsPage() {
         redirect("/login")
     }
 
-    const events = await (prisma.event as any).findMany({
-        where: {
-            organizerId: user.id
-        },
-        include: {
-            ticketTypes: {
-                include: {
-                    _count: {
-                        select: { tickets: true }
-                    }
-                }
+    const includeTicketTypes = {
+        ticketTypes: {
+            include: {
+                _count: { select: { tickets: true } }
             }
-        },
-        orderBy: {
-            startDate: 'desc'
         }
+    }
+
+    // Own events
+    const ownEvents = await (prisma.event as any).findMany({
+        where: { organizerId: user.id },
+        include: includeTicketTypes,
+        orderBy: { startDate: 'desc' }
     })
+
+    // Co-organized events
+    const coOrgRows = await (prisma.eventCoOrganizer as any).findMany({
+        where: { userId: user.id },
+        include: {
+            event: { include: includeTicketTypes }
+        },
+        orderBy: { createdAt: 'desc' }
+    })
+    const coOrgEvents = coOrgRows.map((row: any) => ({ ...row.event, isCoOrg: true }))
+
+    const events = [
+        ...ownEvents.map((e: any) => ({ ...e, isCoOrg: false })),
+        ...coOrgEvents
+    ]
+
 
     return (
         <div className="space-y-8 pb-12">
@@ -67,16 +80,21 @@ export default async function OrganizerEventsPage() {
                         }
 
                         return (
-                            <Card key={event.id} className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-colors shadow-lg">
+                            <Card key={`${event.isCoOrg ? 'co' : 'own'}-${event.id}`} className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-colors shadow-lg">
                                 <div className="flex flex-col md:flex-row md:items-center p-6 gap-4">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-1">
+                                        <div className="flex items-center gap-3 mb-1 flex-wrap">
                                             <h3 className="font-bold text-lg">{event.title}</h3>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-black border ${statusColors[event.status as keyof typeof statusColors]}`}>
                                                 {event.status === 'PENDING' ? 'En Revisión' :
                                                  event.status === 'APPROVED' ? 'Aprobado' :
                                                  event.status === 'CANCELLED' ? 'Cancelado' : 'Rechazado'}
                                             </span>
+                                            {event.isCoOrg && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-black border bg-primary/10 text-primary border-primary/20">
+                                                    <Users className="h-3 w-3" /> Co-org
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-x-6 gap-y-2">
                                             <span className="flex items-center gap-1">
@@ -98,6 +116,7 @@ export default async function OrganizerEventsPage() {
                                             </div>
                                         )}
                                     </div>
+
                                     <div className="flex items-center gap-2 relative z-20">
                                         {event.status !== 'CANCELLED' ? (
                                             <>
@@ -117,15 +136,20 @@ export default async function OrganizerEventsPage() {
                                                         />
                                                     </>
                                                 )}
-                                                <Link 
-                                                    href={`/dashboard/events/${event.id}/edit`}
-                                                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 bg-background/50 cursor-pointer relative z-20")}
-                                                >
-                                                    <Edit className="h-3.5 w-3.5" /> <span className="hidden md:inline">Editar</span>
-                                                </Link>
-                                                <div className="cursor-pointer relative z-20">
-                                                    <DeleteEventButton eventId={event.id} />
-                                                </div>
+                                                {/* Only owner can edit/delete */}
+                                                {!event.isCoOrg && (
+                                                    <>
+                                                        <Link 
+                                                            href={`/dashboard/events/${event.id}/edit`}
+                                                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 bg-background/50 cursor-pointer relative z-20")}
+                                                        >
+                                                            <Edit className="h-3.5 w-3.5" /> <span className="hidden md:inline">Editar</span>
+                                                        </Link>
+                                                        <div className="cursor-pointer relative z-20">
+                                                            <DeleteEventButton eventId={event.id} />
+                                                        </div>
+                                                    </>
+                                                )}
                                             </>
                                         ) : (
                                             <span className="text-xs italic text-muted-foreground mr-4">Evento retirado</span>

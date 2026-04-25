@@ -23,9 +23,10 @@ model User {
   organizerBio    String?
   stripeAccountId String?         @unique
   chargesEnabled  Boolean         @default(false)
-  events          Event[]         @relation("OrganizerEvents")
-  favorites       Favorite[]
-  orders          Order[]
+  events               Event[]            @relation("OrganizerEvents")
+  favorites            Favorite[]
+  orders               Order[]
+  coOrganizerEvents    EventCoOrganizer[]
 }
 
 model Event {
@@ -40,14 +41,16 @@ model Event {
   isPublished     Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
-  organizerId     String
-  rejectionReason String?
-  status          EventStatus  @default(PENDING)
-  checkinToken    String       @unique @default(uuid())
-  organizer       User         @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: Cascade)
-  favorites       Favorite[]
-  orders          Order[]
-  ticketTypes     TicketType[]
+  organizerId      String
+  rejectionReason  String?
+  status           EventStatus  @default(PENDING)
+  checkinToken     String       @unique @default(uuid())
+  inviteToken      String?      @unique
+  organizer        User         @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: Cascade)
+  favorites        Favorite[]
+  orders           Order[]
+  ticketTypes      TicketType[]
+  coOrganizers     EventCoOrganizer[]
   startedEmailSent DateTime?
   endedEmailSent   DateTime?
   isModification   Boolean      @default(false)
@@ -103,6 +106,17 @@ model Favorite {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
+}
+
+model EventCoOrganizer {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
 }
 
 enum Role {
