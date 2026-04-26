@@ -7,7 +7,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button-variants"
 
-export default async function AttendeesPage({ params }: { params: { id: string } }) {
+export default async function AttendeesPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -15,7 +15,9 @@ export default async function AttendeesPage({ params }: { params: { id: string }
         redirect("/login")
     }
 
-    const eventId = params.id
+    const resolvedParams = await params;
+    const eventId = resolvedParams.id
+
 
     // Check ownership or co-organizer
     const event = await prisma.event.findUnique({
