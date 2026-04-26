@@ -136,6 +136,13 @@ export default async function OrganizerEventsPage() {
                                                         />
                                                     </>
                                                 )}
+                                                <Link 
+                                                    href={`/dashboard/events/${event.id}/attendees`}
+                                                    className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "gap-2 cursor-pointer relative z-20 shadow-[0_0_10px_rgba(var(--secondary),0.3)] hover:scale-105 transition-transform bg-secondary text-secondary-foreground")}
+                                                    title="Ver Asistentes y Ventas"
+                                                >
+                                                    <Users className="h-4 w-4" /> <span className="hidden md:inline">Asistentes</span>
+                                                </Link>
                                                 {/* Only owner can edit/delete */}
                                                 {!event.isCoOrg && (
                                                     <>
